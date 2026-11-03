@@ -1,5 +1,5 @@
 // Robo Duel service worker: works offline for practice, always tries fresh code first.
-const CACHE = "robo-duel-v2";
+const CACHE = "robo-duel-v4";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./data/bio.json", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {

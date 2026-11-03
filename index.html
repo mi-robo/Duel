@@ -144,17 +144,55 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .hrow:last-child{border-bottom:0}
 footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
 @media (max-width:520px){.vs .big{font-size:26px}.timer{font-size:22px}body{font-size:16px}}
+/* ===== v3 additions ===== */
+.solo-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px}
+.solo-stats{display:flex;gap:6px;font-weight:700}
+.solo-stats span{border:3px solid var(--line);background:var(--panel);padding:2px 8px}
+.verdict{font-weight:700;font-size:18px;margin:12px 0 0}
+.verdict.ok{color:var(--ok)}.verdict.no{color:var(--bad)}
+.solo-nav{display:flex;gap:10px;margin-top:14px}
+.solo-nav .btn{flex:1}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tile{position:relative;text-align:left;border:3px solid var(--line);box-shadow:var(--shadow);padding:18px 16px;min-height:140px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;color:#13202E}
+.tile:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--line)}
+.tile .tt{font-size:26px;font-weight:700;line-height:1.2}
+.tile .ts{font-size:14px;font-weight:600;opacity:.8}
+.tile .ic{font-size:30px;line-height:1}
+.t-practice{background:var(--p1)}.t-duel{background:var(--p2)}.t-history{background:var(--gold)}.t-rev{background:#8FD694}
+.cnt{position:absolute;top:-10px;right:-10px;min-width:30px;height:30px;padding:0 6px;display:grid;place-items:center;background:var(--bad);color:#fff;border:3px solid var(--line);font-weight:700;font-size:15px}
+.ibtn{position:relative}
+.ibtn .cnt{top:-9px;right:-9px;min-width:22px;height:22px;font-size:12px;border-width:2px}
+.backbar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.backbar h2{margin:0;font-size:24px}
+.backbtn{width:44px;height:44px;border:3px solid var(--line);background:var(--panel);box-shadow:3px 3px 0 var(--line);font-size:20px;cursor:pointer;font-weight:700}
+.sec-title{font-weight:700;font-size:18px;margin:22px 0 10px}
+.card{padding:14px;margin-bottom:12px}
+.card .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.card .nm{font-weight:700;font-size:18px}
+.card .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.card .acts .btn{flex:1;padding:8px 10px}
+.mtag{font-size:13px;font-weight:700;border:2px solid var(--line);padding:0 8px;background:var(--panel2)}
+.mtag.live{background:var(--p2);color:#2A0B14}.mtag.async{background:var(--p1);color:#0B1A22}
+.info{font-size:15px;line-height:1.7;color:var(--mute)}
+.info b{color:var(--ink)}
+.res-w{color:var(--ok);font-weight:700}.res-l{color:var(--bad);font-weight:700}.res-d{color:var(--mute);font-weight:700}
+.clickrow{cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border:3px solid var(--line);font-weight:600;z-index:60;max-width:90vw}
+.nrow{padding:10px 0;border-bottom:2px dashed var(--mute)}
+.nrow:last-child{border-bottom:0}
+.nrow.unread{font-weight:700}
+.modal .blk{max-height:85vh;overflow:auto}
+.big-cta{width:100%;font-size:20px;padding:16px}
+@media (max-width:420px){.tile .tt{font-size:22px}.tile{min-height:120px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="logo" href="#" onclick="go('home');return false" aria-label="Mi Robo Duel home">
-      <span class="px">Robo Duel</span>
-    </a>
+    <a class="logo" href="#home" aria-label="Robo Duel হোম"><span class="px">Robo Duel</span></a>
     <div class="hbtns">
-      <button id="installBtn" class="ibtn hidden" onclick="doInstall()" title="অ্যাপ ইনস্টল করো" aria-label="অ্যাপ ইনস্টল করো">⬇️</button>
-      <button id="bellBtn" class="ibtn" onclick="toggleBell()" aria-label="নোটিফিকেশন" aria-pressed="false">🔔</button>
+      <button id="installBtn" class="ibtn hidden" onclick="doInstall()" aria-label="অ্যাপ ইনস্টল করো">⬇️</button>
+      <button id="bellBtn" class="ibtn hidden" onclick="openInbox()" aria-label="নোটিফিকেশন">🔔<span id="bellCnt" class="cnt hidden"></span></button>
       <button id="themeBtn" class="ibtn" onclick="toggleTheme()" aria-label="থিম বদলাও">🌙</button>
       <span id="meBadge" class="badge hidden"></span>
     </div>
@@ -172,12 +210,110 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
 
   <!-- Home -->
   <section id="s-home" class="hidden">
-    <div class="tabs" role="tablist">
-      <button role="tab" data-tab="practice" aria-selected="true">অনুশীলন</button>
-      <button role="tab" data-tab="duel" aria-selected="false">ডুয়েল</button>
-      <button role="tab" data-tab="history" aria-selected="false">ইতিহাস</button>
+    <div class="tiles">
+      <button class="tile t-practice" onclick="go('practice')"><span class="ic">📘</span><span><span class="tt">অনুশীলন</span><br><span class="ts" id="tsPractice">একা প্র্যাকটিস</span></span></button>
+      <button class="tile t-duel" onclick="go('duels')"><span class="ic">⚔️</span><span><span class="tt">ডুয়েল</span><br><span class="ts" id="tsDuel">বন্ধুর সাথে লড়াই</span></span><span id="duelCnt" class="cnt hidden"></span></button>
+      <button class="tile t-history" onclick="go('history')"><span class="ic">📊</span><span><span class="tt">ইতিহাস</span><br><span class="ts" id="tsHistory">রেকর্ড ও দুর্বল অধ্যায়</span></span></button>
+      <button class="tile t-rev" onclick="startRevision()"><span class="ic">🔁</span><span><span class="tt">ভুলের রিভিশন</span><br><span class="ts" id="tsRev">যেগুলো ভুল করেছ</span></span></button>
     </div>
+    <div id="homeAlert"></div>
+  </section>
 
+  <!-- Practice -->
+  <section id="s-practice" class="hidden">
+    <div class="backbar"><button class="backbtn" onclick="go('home')" aria-label="পেছনে">←</button><h2>অনুশীলন</h2></div>
+    <div class="blk panel">
+      <span class="lbl">কীভাবে অনুশীলন করবে?</span>
+      <div class="seg" id="pmodeSeg">
+        <button type="button" data-pm="exam" aria-pressed="true">📝 পরীক্ষা দিয়ে</button>
+        <button type="button" data-pm="solo" aria-pressed="false">🎯 একটা একটা করে</button>
+      </div>
+      <p class="hint" id="pmodeHint">সময় ধরে পরীক্ষা, শেষে রেজাল্ট।</p>
+    </div>
+    <div id="practiceFilters"></div>
+    <button class="btn primary big-cta" onclick="startPractice()">অনুশীলন শুরু</button>
+    <div class="sec-title">আগের অনুশীলন</div>
+    <div id="practiceList"></div>
+  </section>
+
+  <!-- One by one -->
+  <section id="s-solo" class="hidden">
+    <div class="solo-bar">
+      <button class="btn" onclick="endSolo()">← শেষ করো</button>
+      <div class="solo-stats"><span title="সঠিক">✅ <b id="soC">০</b></span><span title="ভুল">❌ <b id="soW">০</b></span><span title="টানা সঠিক">🔥 <b id="soS">০</b></span></div>
+    </div>
+    <div id="soloCard"></div>
+  </section>
+
+  <!-- Duels -->
+  <section id="s-duels" class="hidden">
+    <div class="backbar"><button class="backbtn" onclick="go('home')" aria-label="পেছনে">←</button><h2>ডুয়েল</h2></div>
+    <button class="btn pink big-cta" onclick="go('create')">⚔️ চ্যালেঞ্জ পাঠাও</button>
+    <div id="permHint"></div>
+    <div class="sec-title">বাকি আছে</div>
+    <div id="pendingList"></div>
+    <div class="sec-title">শেষ হওয়া ডুয়েল</div>
+    <div id="doneList"></div>
+  </section>
+
+  <!-- Create challenge -->
+  <section id="s-create" class="hidden">
+    <div class="backbar"><button class="backbtn" onclick="go('duels')" aria-label="পেছনে">←</button><h2>চ্যালেঞ্জ পাঠাও</h2></div>
+    <div class="blk panel">
+      <span class="lbl">কাকে?</span>
+      <div id="plist" class="plist"><p class="hint">লোড হচ্ছে...</p></div>
+    </div>
+    <div class="blk panel">
+      <span class="lbl">কীভাবে?</span>
+      <div class="seg" id="modeSeg">
+        <button type="button" data-mode="live" aria-pressed="true">⚡ লাইভ (একসাথে)</button>
+        <button type="button" data-mode="async" aria-pressed="false">🕒 যখন খুশি</button>
+      </div>
+      <p class="hint" id="modeHint">দুজন একসাথে শুরু করবে। ওকে অনলাইনে থাকতে হবে।</p>
+      <div class="field hidden" id="deadlineBox"><label for="fDeadline">কতক্ষণের মধ্যে দিতে হবে?</label>
+        <select id="fDeadline"><option value="1">১ ঘণ্টা</option><option value="3">৩ ঘণ্টা</option><option value="6">৬ ঘণ্টা</option><option value="10" selected>১০ ঘণ্টা</option><option value="24">২৪ ঘণ্টা</option></select>
+      </div>
+    </div>
+    <div id="createFilters"></div>
+    <button id="sendBtn" class="btn pink big-cta" onclick="sendDuel()" disabled>চ্যালেঞ্জ পাঠাও</button>
+  </section>
+
+  <!-- History -->
+  <section id="s-history" class="hidden">
+    <div class="backbar"><button class="backbtn" onclick="go('home')" aria-label="পেছনে">←</button><h2>ইতিহাস</h2></div>
+    <div class="blk panel"><span class="lbl">মুখোমুখি রেকর্ড</span><div id="h2h" class="hint"></div></div>
+    <div class="blk panel"><span class="lbl">সংক্ষেপে</span><div id="sumStats"></div></div>
+    <div class="blk panel"><span class="lbl">অধ্যায়ভিত্তিক নির্ভুলতা (দুর্বল আগে)</span><div id="chStats"></div></div>
+  </section>
+
+  <!-- Exam -->
+  <section id="s-exam" class="hidden">
+    <div class="bar">
+      <div class="t">
+        <span id="exTitle" style="font-weight:700"></span>
+        <span id="timer" class="timer">--:--</span>
+      </div>
+      <div class="prog"><span>তুমি</span><div class="track"><i id="myTrack"></i></div><span id="myProg">0/0</span></div>
+      <div id="herRow" class="prog hidden"><span id="herName">ও</span><div class="track her"><i id="herTrack"></i></div><span id="herProg">0/0</span></div>
+    </div>
+    <div id="qList"></div>
+    <div class="sticky-bottom"><button class="btn gold" onclick="confirmSubmit()">জমা দাও</button></div>
+  </section>
+
+  <!-- Result -->
+  <section id="s-result" class="hidden">
+    <div class="backbar"><button class="backbtn" onclick="go(resultBack)" aria-label="পেছনে">←</button><h2>রেজাল্ট</h2></div>
+    <div id="resTop"></div>
+    <div class="seg" style="margin:12px 0">
+      <button type="button" data-rv="all" aria-pressed="true">সব</button>
+      <button type="button" data-rv="wrong" aria-pressed="false">আমার ভুল/বাদ</button>
+      <button type="button" data-rv="diff" aria-pressed="false" id="rvDiff">যেখানে আমরা আলাদা</button>
+    </div>
+    <div id="review"></div>
+  </section>
+
+  <!-- Filters (moved between Practice and Create) -->
+  <div id="filterHome" class="hidden">
     <div id="filterBox" class="blk panel">
       <div class="row">
         <div class="field"><label for="fSubject">বিষয়</label><select id="fSubject"></select></div>
@@ -188,6 +324,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
               <option value="t:medical">মেডিকেল ও ডেন্টাল</option>
               <option value="t:varsity">ভার্সিটি (সব)</option>
               <option value="t:board">HSC বোর্ড</option>
+              <option value="t:book">পাঠ্যবই ও গাইডের প্রশ্ন</option>
             </optgroup>
             <optgroup label="ভার্সিটি অনুযায়ী">
               <option value="s:DU">ঢাবি (DU)</option>
@@ -210,72 +347,26 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
         <div id="chips" class="chips"></div>
         <p class="hint">কোনো অধ্যায় না বাছলে সব অধ্যায় থেকে আসবে। পাওয়া যাচ্ছে: <span id="poolN" class="count">0</span>টি প্রশ্ন</p>
       </div>
-      <div class="row">
+      <div class="row exam-only">
         <div class="field"><label for="fCount">প্রশ্ন সংখ্যা</label><input id="fCount" type="number" min="5" max="200" value="25"></div>
         <div class="field"><label for="fTime">সময় (মিনিট)</label>
           <select id="fTime"><option value="0" id="noTimeOpt">সময় ছাড়া</option><option>5</option><option selected>10</option><option>15</option><option>20</option><option>30</option><option>45</option><option>60</option><option value="custom">নিজে দেব</option></select>
           <input id="fTimeCustom" class="hidden" type="number" min="1" max="180" placeholder="মিনিট" style="margin-top:6px">
         </div>
       </div>
-      <div class="field"><label class="check"><input id="fNeg" type="checkbox"> নেগেটিভ মার্কিং (ভুলে −০.২৫)</label></div>
-      <div class="field"><label class="check"><input id="fFresh" type="checkbox" checked> আগে না দেখা প্রশ্ন আগে দাও</label></div>
+      <div class="field exam-only"><label class="check"><input id="fNeg" type="checkbox"> নেগেটিভ মার্কিং (ভুলে −০.২৫)</label></div>
+      <div class="field" style="margin-bottom:0"><label class="check"><input id="fFresh" type="checkbox" checked> আগে না দেখা প্রশ্ন আগে দাও</label></div>
     </div>
-
-    <div data-pane="practice">
-      <button class="btn primary" style="width:100%" onclick="startPractice()">অনুশীলন শুরু</button>
-    </div>
-
-    <div data-pane="duel" class="hidden">
-      <div class="blk panel">
-        <span class="lbl">কাকে চ্যালেঞ্জ করবে?</span>
-        <div id="plist" class="plist"><p class="hint">লোড হচ্ছে...</p></div>
-        <p id="fbWarn" class="hint hidden">ডুয়েল চালু করতে Firebase সেটআপ লাগবে (index.html এর উপরের FIREBASE_CONFIG)।</p>
-      </div>
-      <button id="sendBtn" class="btn pink" style="width:100%" onclick="sendDuel()" disabled>চ্যালেঞ্জ পাঠাও</button>
-      <p id="outStatus" class="hint" style="text-align:center"></p>
-    </div>
-
-    <div data-pane="history" class="hidden">
-      <div class="blk panel"><span class="lbl">মুখোমুখি রেকর্ড</span><div id="h2h" class="hint">কোনো ডুয়েল এখনো হয়নি।</div></div>
-      <div class="blk panel"><span class="lbl">শেষ ডুয়েলগুলো</span><div id="hList"></div></div>
-      <div class="blk panel"><span class="lbl">অধ্যায়ভিত্তিক নির্ভুলতা (এই ডিভাইসে)</span><div id="chStats"></div></div>
-    </div>
-  </section>
-
-  <!-- Exam -->
-  <section id="s-exam" class="hidden">
-    <div class="bar">
-      <div class="t">
-        <span id="exTitle" style="font-weight:700"></span>
-        <span id="timer" class="timer">--:--</span>
-      </div>
-      <div class="prog"><span>তুমি</span><div class="track"><i id="myTrack"></i></div><span id="myProg">0/0</span></div>
-      <div id="herRow" class="prog hidden"><span id="herName">ও</span><div class="track her"><i id="herTrack"></i></div><span id="herProg">0/0</span></div>
-    </div>
-    <div id="qList"></div>
-    <div class="sticky-bottom"><button class="btn gold" onclick="confirmSubmit()">জমা দাও</button></div>
-  </section>
-
-  <!-- Result -->
-  <section id="s-result" class="hidden">
-    <div id="resTop"></div>
-    <div class="seg" style="margin:12px 0">
-      <button type="button" data-rv="all" aria-pressed="true">সব</button>
-      <button type="button" data-rv="wrong" aria-pressed="false">আমার ভুল/বাদ</button>
-      <button type="button" data-rv="diff" aria-pressed="false" id="rvDiff">যেখানে আমরা আলাদা</button>
-    </div>
-    <div id="review"></div>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="go('home')">হোমে ফিরি</button>
-  </section>
+  </div>
 
   <footer><span class="px">Built by Mi Robo</span><br><span id="srcNote"></span></footer>
 </div>
 
-<div id="modal" class="modal hidden"><div class="blk" id="modalBody"></div></div>
+<div id="modal" class="modal hidden" onclick="if(event.target===this && !modalLocked) closeModal()"><div class="blk" id="modalBody"></div></div>
+<div id="toast" class="toast hidden" role="status"></div>
 
 <script>
 /* ============ CONFIG ============ */
-// Firebase Console > Project settings > Your apps > Web app config. Paste here.
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyB29ZB1Qjosq-9iaiIiV7rs7LzC3craoxQ",
   authDomain: "robo-duel.firebaseapp.com",
@@ -288,42 +379,66 @@ const SUBJECTS = [
   // later: { id:"phy", name:"পদার্থবিজ্ঞান", file:"data/phy.json" },
 ];
 
-/* ============ STATE ============ */
+/* ============ HELPERS ============ */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const LS = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
-let me = LS.get("rd_me", null);           // {uid,name}
-let banks = {};                           // subjectId -> data
-let bank = null, subjId = SUBJECTS[0].id;
-let paper = 0, pickedCh = new Set();
-let exam = null;                          // running exam
-let db = null, srvOffset = 0, players = {}, oppSel = null;
-let timerInt = null;
-const now = () => Date.now() + srvOffset;
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bn = n => String(n).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
 const L = "ABCDE";
+const fmt = s => String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+function fmtLeft(ms){
+  if (ms <= 0) return "সময় শেষ";
+  const m = Math.ceil(ms/60000), h = Math.floor(m/60);
+  return h ? `${bn(h)} ঘণ্টা ${bn(m%60)} মিনিট` : `${bn(m)} মিনিট`;
+}
+const dateBn = t => new Date(t).toLocaleDateString("bn-BD", { day: "numeric", month: "short" }) + ", " + new Date(t).toLocaleTimeString("bn-BD", { hour: "numeric", minute: "2-digit" });
+let toastT = null;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.remove("hidden"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add("hidden"), 2600); }
 
-/* ============ NAV ============ */
-function go(screen){
-  ["setup","home","exam","result"].forEach(s => $("#s-"+s).classList.toggle("hidden", s !== screen));
+/* ============ STATE ============ */
+let me = LS.get("rd_me", null);
+let banks = {}, bank = null, subjId = SUBJECTS[0].id;
+let paper = 0, pickedCh = new Set();
+let exam = null, timerInt = null;
+let db = null, srvOffset = 0, players = {}, duels = {}, duelsLoaded = false;
+let oppSel = null, createMode = "live";
+let resultBack = "home", resultReady = false;
+let launched = new Set(), waitingFor = null, sentWaiting = null, modalLocked = false;
+const now = () => Date.now() + srvOffset;
+
+/* ============ ROUTER ============ */
+const SCREENS = ["setup","home","practice","solo","duels","create","history","exam","result"];
+function go(s){ if (location.hash.slice(1) !== s) location.hash = s; else render(); }
+window.addEventListener("hashchange", render);
+function render(){
+  let s = location.hash.slice(1) || "home";
+  if (!me) s = "setup";
+  else if (s === "setup") s = "home";
+  if (exam && !exam.done && s !== "exam"){ history.replaceState(null, "", "#exam"); s = "exam"; toast("পরীক্ষা চলছে! আগে জমা দাও"); }
+  if (s === "exam" && !(exam && !exam.done)) s = "home";
+  if (s === "result" && !resultReady) s = "home";
+  if (s === "solo" && !solo) s = "practice";
+  if (!SCREENS.includes(s)) s = "home";
+  SCREENS.forEach(x => $("#s-"+x).classList.toggle("hidden", x !== s));
+  if (s === "practice"){ $("#practiceFilters").appendChild($("#filterBox")); $("#noTimeOpt").disabled = false; setPMode(practiceMode); }
+  if (s === "create"){ $("#createFilters").appendChild($("#filterBox")); $$(".exam-only").forEach(e => e.classList.remove("hidden")); $("#noTimeOpt").disabled = true; if ($("#fTime").value === "0") $("#fTime").value = "10"; }
   window.scrollTo(0,0);
-  if (screen === "home") refreshHome();
+  refreshScreen(s);
 }
-$$(".tabs button").forEach(b => b.onclick = () => setTab(b.dataset.tab));
-function setTab(t){
-  $$(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
-  $$("[data-pane]").forEach(p => p.classList.toggle("hidden", p.dataset.pane !== t));
-  $("#filterBox").classList.toggle("hidden", t === "history");
-  $("#noTimeOpt").disabled = t === "duel";
-  if (t === "duel" && $("#fTime").value === "0") $("#fTime").value = "10";
-  if (t === "history") renderHistory();
-  if (t === "duel") renderPlayers();
+function curScreen(){ return SCREENS.find(x => !$("#s-"+x).classList.contains("hidden")); }
+function refreshScreen(s = curScreen()){
+  $("#meBadge").textContent = me ? me.name : ""; $("#meBadge").classList.toggle("hidden", !me);
+  if (s === "home") renderHome();
+  if (s === "practice"){ renderPracticeList(); if (bank) updatePool(); }
+  if (s === "duels") renderDuels();
+  if (s === "create"){ renderPlayers(); if (bank) updatePool(); }
+  if (s === "history") renderHistory();
+  updateBadges();
 }
-function curTab(){ return $(".tabs button[aria-selected=true]").dataset.tab; }
 
 /* ============ SETUP ============ */
 function saveName(){
@@ -331,23 +446,22 @@ function saveName(){
   if (!n) return;
   me = { uid: (me && me.uid) || ("u" + Math.random().toString(36).slice(2,10)), name: n };
   LS.set("rd_me", me);
-  boot();
+  boot().then(() => go("home"));
 }
 
-/* ============ DATA ============ */
+/* ============ DATA & FILTERS ============ */
 async function loadBank(id){
   if (banks[id]) return banks[id];
   const s = SUBJECTS.find(x => x.id === id);
-  const r = await fetch(s.file);
-  const d = await r.json();
-  banks[id] = d;
-  return d;
+  const d = await (await fetch(s.file)).json();
+  banks[id] = d; return d;
 }
+const secName = (b, i) => b.secs[i];
+function tgtOf(b, sec){ const n = b.secs[sec]; return n === "MEDICAL" ? "medical" : n === "BOARD" ? "board" : (n === "BOOK" || n === "GUIDE") ? "book" : "varsity"; }
 function renderChips(){
-  const box = $("#chips");
   const counts = {};
   bank.q.forEach(q => counts[q[0]] = (counts[q[0]]||0) + 1);
-  box.innerHTML = bank.chapters.map((c,i) => (paper && c.p !== paper) ? "" :
+  $("#chips").innerHTML = bank.chapters.map((c,i) => (paper && c.p !== paper) ? "" :
     `<button type="button" class="chip" data-ch="${i}" aria-pressed="${pickedCh.has(i)}">${esc(c.n)} <small>${bn(counts[i]||0)}</small></button>`).join("");
   $$("#chips .chip").forEach(b => b.onclick = () => {
     const i = +b.dataset.ch;
@@ -366,79 +480,173 @@ $$("[data-paper]").forEach(b => b.onclick = () => {
 $("#fSrc").onchange = updatePool;
 $("#fTime").onchange = () => $("#fTimeCustom").classList.toggle("hidden", $("#fTime").value !== "custom");
 $("#fSubject").onchange = async () => { subjId = $("#fSubject").value; bank = await loadBank(subjId); pickedCh.clear(); renderChips(); };
-
 function pool(){
-  const src = $("#fSrc").value;
-  const secIdx = n => bank.secs.indexOf(n);
-  const tgtOf = sec => bank.secs[sec] === "MEDICAL" ? "medical" : bank.secs[sec] === "BOARD" ? "board" : "varsity";
-  const ids = [];
+  const src = $("#fSrc").value, ids = [];
   bank.q.forEach((q,i) => {
     const ch = bank.chapters[q[0]];
     if (pickedCh.size ? !pickedCh.has(q[0]) : (paper && ch.p !== paper)) return;
-    if (src.startsWith("t:") && tgtOf(q[5]) !== src.slice(2)) return;
-    if (src.startsWith("s:") && q[5] !== secIdx(src.slice(2))) return;
+    if (src.startsWith("t:") && tgtOf(bank, q[5]) !== src.slice(2)) return;
+    if (src.startsWith("s:") && q[5] !== bank.secs.indexOf(src.slice(2))) return;
     ids.push(i);
   });
   return ids;
 }
 function updatePool(){ $("#poolN").textContent = bn(pool().length); }
-
+const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 function pickQuestions(n){
-  const all = pool();
-  const seen = new Set(LS.get("rd_seen_"+subjId, []));
-  const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
-  let list;
-  if ($("#fFresh").checked){
-    const fresh = shuffle(all.filter(i => !seen.has(i)));
-    const old = shuffle(all.filter(i => seen.has(i)));
-    list = fresh.concat(old);
-  } else list = shuffle(all);
+  const all = pool(), seen = new Set(LS.get("rd_seen_"+subjId, []));
+  const list = $("#fFresh").checked ? shuffle(all.filter(i => !seen.has(i))).concat(shuffle(all.filter(i => seen.has(i)))) : shuffle(all);
   return list.slice(0, n);
 }
 function settings(){
   let mins = $("#fTime").value;
   mins = mins === "custom" ? (+$("#fTimeCustom").value || 10) : +mins;
-  return { count: Math.max(5, Math.min(200, +$("#fCount").value || 25)), mins, neg: $("#fNeg").checked, src: $("#fSrc").value };
+  return { count: Math.max(5, Math.min(200, +$("#fCount").value || 25)), mins, neg: $("#fNeg").checked };
 }
-function chapterLabel(qids){
+function chLabels(){
+  if (pickedCh.size) return [...pickedCh].sort((a,b) => a-b).map(i => bank.chapters[i].n);
+  return [];
+}
+function chText(chs, pap){ return chs && chs.length ? chs.join(", ") : (pap === 1 ? "১ম পত্রের সব অধ্যায়" : pap === 2 ? "২য় পত্রের সব অধ্যায়" : "সব অধ্যায়"); }
+function srcLabel(){ const o = $("#fSrc").selectedOptions[0]; return o ? o.textContent : "সব প্রশ্ন"; }
+function titleFor(qids){
   const set = new Set(qids.map(i => bank.q[i][0]));
   if (set.size === 1) return bank.chapters[[...set][0]].n;
   return bank.subject + " (" + bn(set.size) + "টি অধ্যায়)";
 }
 
-/* ============ EXAM ============ */
-function startPractice(){
-  const s = settings();
-  const qids = pickQuestions(s.count);
-  if (!qids.length) return alert("এই ফিল্টারে কোনো প্রশ্ন নেই।");
-  runExam({ mode: "practice", subj: subjId, qids, mins: s.mins, neg: s.neg, title: chapterLabel(qids),
-            endAt: s.mins ? Date.now() + s.mins*60000 : 0 });
+/* ============ PRACTICE ============ */
+let practiceMode = LS.get("rd_pmode", "exam"), solo = null;
+function setPMode(m){
+  practiceMode = m; LS.set("rd_pmode", m);
+  $$("#pmodeSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.pm === m));
+  $$(".exam-only").forEach(e => e.classList.toggle("hidden", m === "solo"));
+  $("#pmodeHint").textContent = m === "solo" ? "একটা করে প্রশ্ন। উত্তর দিলেই দেখাবে ঠিক না ভুল, ব্যাখ্যা থাকলে সেটাও।" : "সময় ধরে পরীক্ষা, শেষে রেজাল্ট।";
 }
+$$("#pmodeSeg button").forEach(b => b.onclick = () => setPMode(b.dataset.pm));
+function startPractice(){
+  if (practiceMode === "solo") return startSolo();
+  const s = settings(), qids = pickQuestions(s.count);
+  if (!qids.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
+  runExam({ subj: subjId, qids, neg: s.neg, title: titleFor(qids), startAt: Date.now(), endAt: s.mins ? Date.now() + s.mins*60000 : 0 });
+}
+async function startRevision(){
+  bank = await loadBank(subjId);
+  const wrong = LS.get("rd_wrong_"+subjId, []);
+  if (!wrong.length) return toast("এখনো কোনো ভুল জমা হয়নি 👏");
+  const qids = shuffle([...wrong]).slice(0, 30);
+  runExam({ subj: subjId, qids, neg: false, title: "ভুলের রিভিশন", startAt: Date.now(), endAt: 0 });
+}
+/* ---- one by one ---- */
+function startSolo(){
+  const list = pickQuestions(pool().length);
+  if (!list.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
+  solo = { subj: subjId, list, i: 0, ans: {}, c: 0, w: 0, streak: 0, best: 0, t: Date.now(), picked: null };
+  go("solo"); renderSolo();
+}
+function renderSolo(){
+  const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi];
+  solo.picked = null;
+  $("#soloCard").innerHTML = `<article class="blk q">
+    <div class="meta"><span>${bn(solo.i+1)}/${bn(solo.list.length)} · ${esc(b.chapters[q[0]].n)}</span><span>${esc(q[4]||"")}</span></div>
+    <h3>${esc(q[1])}</h3>
+    <div class="opts">${q[2].map((o,j) => `<button class="opt" data-j="${j}" onclick="soloAnswer(${j})"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
+    <div id="soloAfter"></div>
+    <div class="solo-nav"><button class="btn" id="soloSkip" onclick="soloSkip()">এড়িয়ে যাও</button></div>
+  </article>`;
+  updateSoloStats();
+}
+function soloAnswer(j){
+  if (solo.picked !== null) return;
+  solo.picked = j;
+  const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi], ok = j === q[3];
+  solo.ans[solo.i] = j;
+  if (ok){ solo.c++; solo.streak++; solo.best = Math.max(solo.best, solo.streak); } else { solo.w++; solo.streak = 0; }
+  $$("#soloCard .opt").forEach(btn => {
+    const k = +btn.dataset.j; btn.disabled = true;
+    if (k === q[3]) btn.classList.add("right"); else if (k === j) btn.classList.add("wrong");
+  });
+  $("#soloAfter").innerHTML = `<p class="verdict ${ok ? "ok" : "no"}">${ok ? "সঠিক! ✅" : `ভুল ❌ সঠিক উত্তর: ${L[q[3]]}`}</p>` + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
+  $("#soloSkip").outerHTML = `<button class="btn primary" onclick="soloNext()">পরের প্রশ্ন →</button>`;
+  recordLocal({ subj: solo.subj, qids: [qi], ans: { 0: j } });
+  if (navigator.vibrate && !ok) navigator.vibrate(80);
+  updateSoloStats();
+}
+function soloSkip(){
+  if (solo.picked !== null) return;
+  solo.picked = -1;
+  const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi];
+  $$("#soloCard .opt").forEach(btn => { btn.disabled = true; if (+btn.dataset.j === q[3]) btn.classList.add("right"); });
+  $("#soloAfter").innerHTML = `<p class="verdict">এড়িয়ে গেছ। সঠিক উত্তর: ${L[q[3]]}</p>` + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
+  $("#soloSkip").outerHTML = `<button class="btn primary" onclick="soloNext()">পরের প্রশ্ন →</button>`;
+  recordLocal({ subj: solo.subj, qids: [qi], ans: {} });
+}
+function updateSoloStats(){ $("#soC").textContent = bn(solo.c); $("#soW").textContent = bn(solo.w); $("#soS").textContent = bn(solo.streak); }
+function soloNext(){
+  solo.i++;
+  if (solo.i >= solo.list.length){ toast("এই ফিল্টারের সব প্রশ্ন শেষ! 🎉"); return endSolo(); }
+  renderSolo(); window.scrollTo(0,0);
+}
+function endSolo(){
+  const s = solo; solo = null;
+  if (!s) return go("practice");
+  const idx = Object.keys(s.ans).map(Number);
+  if (!idx.length) return go("practice");
+  const qids = idx.map(i => s.list[i]), ans = {};
+  idx.forEach((i,k) => ans[k] = s.ans[i]);
+  bank = banks[s.subj];
+  const title = titleFor(qids) + " · একটা একটা";
+  const sess = { title, subj: s.subj, qids, ans, neg: false, used: Date.now() - s.t };
+  const list = LS.get("rd_psess", []); list.unshift(Object.assign({ t: Date.now() }, sess)); LS.set("rd_psess", list.slice(0, 40));
+  showPracticeResult(sess, false, "practice");
+  if (s.best >= 3) toast(`সর্বোচ্চ টানা সঠিক: ${bn(s.best)} 🔥`);
+}
+
+function savePractice(ex){
+  const list = LS.get("rd_psess", []);
+  list.unshift({ t: Date.now(), subj: ex.subj, title: ex.title, qids: ex.qids, ans: ex.ans, neg: ex.neg, used: ex.usedMs });
+  LS.set("rd_psess", list.slice(0, 40));
+}
+function renderPracticeList(){
+  const list = LS.get("rd_psess", []);
+  $("#practiceList").innerHTML = list.length ? list.map((p,i) => {
+    const r = scoreWith(banks[p.subj] || bank, p.ans, p.qids, p.neg);
+    return `<div class="blk card clickrow" onclick="openPractice(${i})"><div class="top"><span class="nm">${esc(p.title)}</span><b>${bn(r.s)}/${bn(p.qids.length)}</b></div>
+      <div class="info">${dateBn(p.t)} · ${bn(r.w)} ভুল · ${bn(r.skip)} বাদ</div></div>`;
+  }).join("") : '<p class="hint">এখনো কোনো অনুশীলন নেই।</p>';
+}
+function openPractice(i){ const p = LS.get("rd_psess", [])[i]; if (p) showPracticeResult(p, false, "practice"); }
+
+/* ============ EXAM ============ */
 function runExam(ex){
-  exam = Object.assign({ ans: {}, startedAt: ex.startAt || Date.now(), done: false }, ex);
+  exam = Object.assign({ ans: {}, done: false }, ex);
+  exam.startedAt = ex.startAt || Date.now();
   $("#exTitle").textContent = exam.title;
-  $("#herRow").classList.toggle("hidden", exam.mode !== "duel");
-  if (exam.mode === "duel") $("#herName").textContent = exam.oppName;
+  $("#herRow").classList.toggle("hidden", !exam.live);
+  if (exam.live){ $("#herName").textContent = exam.oppName; $("#herProg").textContent = "০/" + bn(exam.qids.length); $("#herTrack").style.width = "0"; }
+  const b = banks[exam.subj];
   $("#qList").innerHTML = exam.qids.map((qi, k) => {
-    const q = bank.q[qi];
+    const q = b.q[qi];
     return `<article class="blk q" id="q${k}">
       <div class="meta"><span>${bn(k+1)}/${bn(exam.qids.length)}</span><span>${esc(q[4]||"")}</span></div>
       <h3>${esc(q[1])}</h3>
       <div class="opts">${q[2].map((o,j) => `<button class="opt" data-k="${k}" data-j="${j}"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
     </article>`;
   }).join("");
-  $$("#qList .opt").forEach(b => b.onclick = () => answer(+b.dataset.k, +b.dataset.j));
+  $$("#qList .opt").forEach(btn => btn.onclick = () => answer(+btn.dataset.k, +btn.dataset.j));
+  if (ex.prev) Object.entries(ex.prev).forEach(([k,j]) => lockAnswer(+k, j));
   updateProg();
   go("exam");
-  clearInterval(timerInt);
-  timerInt = setInterval(tick, 250); tick();
+  clearInterval(timerInt); timerInt = setInterval(tick, 250); tick();
+}
+function lockAnswer(k, j){
+  exam.ans[k] = j;
+  $$(`#q${k} .opt`).forEach(b => { b.disabled = true; if (+b.dataset.j === j) b.classList.add("sel"); });
 }
 function answer(k, j){
   if (exam.done || exam.ans[k] !== undefined) return;   // OMR style: one shot
-  exam.ans[k] = j;
-  $$(`#q${k} .opt`).forEach(b => { b.disabled = true; if (+b.dataset.j === j) b.classList.add("sel"); });
-  updateProg();
-  if (exam.mode === "duel" && db) db.ref(`duels/${exam.id}/p/${me.uid}/a/${k}`).set(j);
+  lockAnswer(k, j); updateProg();
+  if (exam.duelId && db) db.ref(`duels/${exam.duelId}/p/${me.uid}/a/${k}`).set(j);
   const nx = $(`#q${k+1}`);
   if (nx) setTimeout(() => nx.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }), 120);
 }
@@ -450,70 +658,91 @@ function updateProg(){
 function tick(){
   if (!exam || exam.done){ clearInterval(timerInt); return; }
   const el = $("#timer");
-  if (!exam.endAt){ const s = Math.floor((Date.now()-exam.startedAt)/1000); el.textContent = fmt(s); el.classList.remove("low"); return; }
-  const left = Math.max(0, Math.ceil((exam.endAt - (exam.mode === "duel" ? now() : Date.now()))/1000));
-  el.textContent = fmt(left);
-  el.classList.toggle("low", left <= 60);
+  const t = exam.duelId ? now() : Date.now();
+  if (!exam.endAt){ el.textContent = fmt(Math.floor((t - exam.startedAt)/1000)); el.classList.remove("low"); return; }
+  const left = Math.max(0, Math.ceil((exam.endAt - t)/1000));
+  el.textContent = fmt(left); el.classList.toggle("low", left <= 60);
   if (left <= 0) submit(true);
 }
-const fmt = s => String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
 function confirmSubmit(){
   const left = exam.qids.length - Object.keys(exam.ans).length;
   modal(`<h3 style="margin-top:0">জমা দেবে?</h3><p>${left ? bn(left)+"টি প্রশ্ন বাকি আছে।" : "সব উত্তর দেওয়া শেষ।"}</p>
     <div class="row"><button class="btn" onclick="closeModal()">না, আরো দেখি</button><button class="btn gold" onclick="closeModal();submit(false)">হ্যাঁ, জমা</button></div>`);
 }
-function score(ans, qids, neg){
-  let c=0,w=0;
-  qids.forEach((qi,k) => { if (ans[k] === undefined) return; ans[k] === bank.q[qi][3] ? c++ : w++; });
+function scoreWith(b, ans, qids, neg){
+  let c=0, w=0;
+  if (b) qids.forEach((qi,k) => { if (ans[k] === undefined || ans[k] === null) return; ans[k] === b.q[qi][3] ? c++ : w++; });
   return { c, w, s: Math.round((c - (neg ? w*0.25 : 0))*100)/100, skip: qids.length - c - w };
 }
 function recordLocal(ex){
+  const b = banks[ex.subj];
   const seen = new Set(LS.get("rd_seen_"+ex.subj, []));
+  const wrong = new Set(LS.get("rd_wrong_"+ex.subj, []));
   const st = LS.get("rd_chstats_"+ex.subj, {});
   ex.qids.forEach((qi,k) => {
     seen.add(qi);
     if (ex.ans[k] === undefined) return;
-    const ch = bank.q[qi][0]; st[ch] = st[ch] || [0,0];
-    st[ch][0]++; if (ex.ans[k] === bank.q[qi][3]) st[ch][1]++;
+    const ok = ex.ans[k] === b.q[qi][3];
+    const ch = b.q[qi][0]; st[ch] = st[ch] || [0,0];
+    st[ch][0]++; if (ok) st[ch][1]++;
+    ok ? wrong.delete(qi) : wrong.add(qi);
   });
-  LS.set("rd_seen_"+ex.subj, [...seen]); LS.set("rd_chstats_"+ex.subj, st);
+  LS.set("rd_seen_"+ex.subj, [...seen]); LS.set("rd_wrong_"+ex.subj, [...wrong]); LS.set("rd_chstats_"+ex.subj, st);
 }
-function submit(timeUp){
+async function submit(timeUp){
   if (!exam || exam.done) return;
   exam.done = true; clearInterval(timerInt);
-  exam.usedMs = (exam.mode === "duel" ? now() : Date.now()) - exam.startedAt;
+  const t = exam.duelId ? now() : Date.now();
+  exam.usedMs = exam.endAt ? Math.min(t - exam.startedAt, exam.endAt - exam.startedAt) : t - exam.startedAt;
   recordLocal(exam);
-  if (exam.mode === "practice"){ showPracticeResult(timeUp); return; }
-  db.ref(`duels/${exam.id}/p/${me.uid}`).update({ done: true, used: Math.min(exam.usedMs, (exam.endAt - exam.startedAt)) });
+  if (!exam.duelId){
+    savePractice(exam);
+    showPracticeResult({ title: exam.title, subj: exam.subj, qids: exam.qids, ans: exam.ans, neg: exam.neg, used: exam.usedMs }, timeUp, "practice");
+    return;
+  }
+  const id = exam.duelId, live = exam.live;
+  await db.ref(`duels/${id}/p/${me.uid}`).update({ done: true, used: Math.max(0, exam.usedMs) });
+  const d = duels[id];
+  if (d && st(d).over){ showDuelResult(d); return; }
+  if (live){
+    waitingFor = id;
+    modal(`<h3 style="margin-top:0">জমা হয়ে গেছে ✅</h3><p>${esc(exam.oppName)} শেষ করার অপেক্ষা...</p><p class="hint">সময় শেষ হলে আপনা আপনি রেজাল্ট আসবে।</p>`);
+  } else {
+    showDuelResult(d || { id });
+  }
 }
 
 /* ============ RESULTS ============ */
 let rvFilter = "all", lastReview = null;
 $$("[data-rv]").forEach(b => b.onclick = () => { rvFilter = b.dataset.rv; $$("[data-rv]").forEach(x => x.setAttribute("aria-pressed", x===b)); renderReview(); });
-function showPracticeResult(timeUp){
-  const r = score(exam.ans, exam.qids, exam.neg);
-  $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
-    ${timeUp ? '<p class="hint">সময় শেষ!</p>' : ""}
-    <div class="crown">${bn(r.s)} / ${bn(exam.qids.length)}</div>
-    <div class="stats"><div><b>${bn(r.c)}</b>সঠিক</div><div><b>${bn(r.w)}</b>ভুল</div><div><b>${bn(r.skip)}</b>বাদ</div></div>
-    <p class="hint">সময় লেগেছে ${fmt(Math.round(exam.usedMs/1000))}</p></div>`;
-  $("#rvDiff").classList.add("hidden");
-  lastReview = { qids: exam.qids, mine: exam.ans, hers: null };
+function openResult(back){
+  resultBack = back; resultReady = true;
   rvFilter = "all"; $$("[data-rv]").forEach(x => x.setAttribute("aria-pressed", x.dataset.rv==="all"));
   renderReview(); go("result");
 }
+function showPracticeResult(p, timeUp, back){
+  const b = banks[p.subj] || bank, r = scoreWith(b, p.ans, p.qids, p.neg);
+  $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
+    ${timeUp ? '<p class="hint">সময় শেষ!</p>' : ""}<p style="margin:0 0 8px;font-weight:700">${esc(p.title)}</p>
+    <div class="crown">${bn(r.s)} / ${bn(p.qids.length)}</div>
+    <div class="stats"><div><b>${bn(r.c)}</b>সঠিক</div><div><b>${bn(r.w)}</b>ভুল</div><div><b>${bn(r.skip)}</b>বাদ</div></div>
+    ${p.used ? `<p class="hint">সময় লেগেছে ${fmt(Math.round(p.used/1000))}</p>` : ""}</div>`;
+  $("#rvDiff").classList.add("hidden");
+  lastReview = { subj: p.subj, qids: p.qids, mine: p.ans, hers: null };
+  openResult(back);
+}
 function renderReview(){
-  const { qids, mine, hers, herName } = lastReview;
+  const { subj, qids, mine, hers, herName } = lastReview, b = banks[subj] || bank;
   $("#review").innerHTML = qids.map((qi,k) => {
-    const q = bank.q[qi], a = q[3], m = mine[k], h = hers ? hers[k] : undefined;
+    const q = b.q[qi], a = q[3], m = mine[k], h = hers ? hers[k] : undefined;
     if (rvFilter === "wrong" && m === a) return "";
     if (rvFilter === "diff" && m === h) return "";
     return `<article class="blk q">
-      <div class="meta"><span>${bn(k+1)}. ${esc(bank.chapters[q[0]].n)}</span><span>${esc(q[4]||"")}</span></div>
+      <div class="meta"><span>${bn(k+1)}. ${esc(b.chapters[q[0]].n)}</span><span>${esc(q[4]||"")}</span></div>
       <h3>${esc(q[1])}</h3>
       <div class="opts">${q[2].map((o,j) => {
-        let cls = j === a ? "right" : (j === m ? "wrong" : "");
-        let tags = (j === m ? `<span class="tag">তুমি</span>` : "") + (hers && j === h ? `<span class="tag">${esc(herName)}</span>` : "");
+        const cls = j === a ? "right" : (j === m ? "wrong" : "");
+        const tags = (j === m ? `<span class="tag">তুমি</span>` : "") + (hers && j === h ? `<span class="tag">${esc(herName)}</span>` : "");
         return `<button class="opt ${cls}" disabled><b>${L[j]}</b><span>${esc(o)}${tags}</span></button>`;
       }).join("")}</div>
       ${m === undefined ? '<p class="hint">তুমি উত্তর দাওনি</p>' : ""}
@@ -522,181 +751,42 @@ function renderReview(){
   }).join("") || '<p class="hint" style="text-align:center">এখানে কিছু নেই 🎉</p>';
 }
 
-/* ============ FIREBASE / DUEL ============ */
-function fbReady(){ return FIREBASE_CONFIG.databaseURL && FIREBASE_CONFIG.apiKey; }
+/* ============ DUEL STATE ============ */
 const oppNameOf = d => d.from === me.uid ? d.toName : d.fromName;
 const oppIdOf = d => d.from === me.uid ? d.to : d.from;
-function initFb(){
-  if (!fbReady() || db) return;
-  firebase.initializeApp(FIREBASE_CONFIG);
-  db = firebase.database();
-  db.ref(".info/serverTimeOffset").on("value", s => srvOffset = s.val() || 0);
-  const pRef = db.ref("players/" + me.uid);
-  const ping = () => pRef.set({ name: me.name, seen: firebase.database.ServerValue.TIMESTAMP });
-  ping(); setInterval(ping, 30000);
-  db.ref("players").on("value", s => { players = s.val() || {}; if (curTab() === "duel") renderPlayers(); });
-  db.ref("inbox/" + me.uid).on("child_added", async s => {
-    const id = s.key;
-    const d = (await db.ref("duels/"+id).once("value")).val();
-    s.ref.remove();
-    if (!d || d.status !== "pending" || Date.now() - d.created > 10*60000) return;
-    incoming(id, d);
-  });
-  resumeActive();
-}
-function renderPlayers(){
-  if (!fbReady()){ $("#fbWarn").classList.remove("hidden"); $("#plist").innerHTML = ""; return; }
-  const list = Object.entries(players).filter(([u]) => u !== me.uid);
-  if (!list.length){ $("#plist").innerHTML = '<p class="hint">আর কেউ এখনো জয়েন করেনি। তোমার বন্ধুকে লিংক পাঠাও।</p>'; return; }
-  $("#plist").innerHTML = list.map(([u,p]) => {
-    const on = now() - (p.seen||0) < 70000;
-    return `<button class="pl" data-u="${u}" aria-pressed="${oppSel===u}"><span><span class="dot ${on?"on":""}"></span>${esc(p.name)}</span><span class="hint">${on?"অনলাইন":"অফলাইন"}</span></button>`;
-  }).join("");
-  $$("#plist .pl").forEach(b => b.onclick = () => { oppSel = b.dataset.u; renderPlayers(); });
-  $("#sendBtn").disabled = !oppSel;
-}
-async function sendDuel(){
-  if (!db || !oppSel) return;
-  const s = settings();
-  if (!s.mins) s.mins = 10;
-  const qids = pickQuestions(s.count);
-  if (!qids.length) return alert("এই ফিল্টারে কোনো প্রশ্ন নেই।");
-  const ref = db.ref("duels").push();
-  const d = { from: me.uid, fromName: me.name, to: oppSel, toName: players[oppSel].name, subj: subjId, qids,
-              mins: s.mins, neg: s.neg, title: chapterLabel(qids), status: "pending", created: Date.now() };
-  await ref.set(d);
-  await db.ref(`inbox/${oppSel}/${ref.key}`).set(true);
-  LS.set("rd_active", ref.key);
-  sentModal(ref.key, d);
-  watchDuel(ref.key);
-}
-function sentModal(id, d){
-  modal(`<h3 style="margin-top:0">চ্যালেঞ্জ পাঠানো হয়েছে</h3><p>${esc(d.toName)} এক্সেপ্ট করলে একসাথে শুরু হবে।</p>
-    <p class="hint">${esc(d.title)} · ${bn(d.qids.length)} প্রশ্ন · ${bn(d.mins)} মিনিট</p>
-    <button class="btn" onclick="cancelDuel('${id}')">বাতিল</button>`);
-}
-function cancelDuel(id){ db.ref("duels/"+id).update({ status: "cancelled" }); LS.set("rd_active", null); closeModal(); }
-function incoming(id, d){
-  ping(`⚔️ ${d.fromName} তোমাকে চ্যালেঞ্জ করেছে!`, `${d.title} · ${d.qids.length} প্রশ্ন · ${d.mins} মিনিট`, id);
-  modal(`<h3 style="margin-top:0">⚔️ ${esc(d.fromName)} তোমাকে চ্যালেঞ্জ করেছে!</h3>
-    <p><b>${esc(d.title)}</b></p><p class="hint">${bn(d.qids.length)} প্রশ্ন · ${bn(d.mins)} মিনিট${d.neg ? " · নেগেটিভ মার্কিং" : ""}</p>
-    <div class="row"><button class="btn" onclick="replyDuel('${id}',false)">পরে</button><button class="btn pink" onclick="replyDuel('${id}',true)">এক্সেপ্ট</button></div>`);
-}
-async function replyDuel(id, yes){
-  closeModal();
-  if (!yes){ db.ref("duels/"+id).update({ status: "declined" }); return; }
-  const d = (await db.ref("duels/"+id).once("value")).val();
-  if (!d || d.status !== "pending"){ alert("এই চ্যালেঞ্জ আর নেই।"); return; }
-  const startAt = now() + 6000;
-  await db.ref("duels/"+id).update({ status: "live", startAt, endAt: startAt + d.mins*60000 });
-  LS.set("rd_active", id);
-  watchDuel(id);
-}
-
-let watching = null, watchingId = null, finished = new Set(), waitTimer = null;
-function watchDuel(id){
-  if (watching && watchingId === id) return;
-  if (watching) watching.off();
-  watchingId = id;
-  watching = db.ref("duels/"+id);
-  let starting = false;
-  watching.on("value", async s => {
-    const d = s.val(); if (!d) return;
-    d.id = id;
-    if (d.status === "declined" || d.status === "cancelled"){
-      if (d.from === me.uid && d.status === "declined"){
-        ping(`${d.toName} এখন পারবে না`, "চ্যালেঞ্জ বাতিল হয়েছে", id);
-        modal(`<h3 style="margin-top:0">${esc(d.toName)} এখন পারবে না</h3><button class="btn" onclick="closeModal()">ঠিক আছে</button>`);
-      }
-      stopWatch(); LS.set("rd_active", null); return;
-    }
-    if (d.status !== "live" && d.status !== "done") return;
-    const mine = (d.p && d.p[me.uid]) || {}, op = (d.p && d.p[oppIdOf(d)]) || {};
-    const timeOver = now() > d.endAt + 3000;
-    // live progress of the other player
-    if (exam && exam.mode === "duel" && exam.id === id){
-      const n = op.a ? Object.keys(op.a).length : 0;
-      $("#herProg").textContent = bn(n) + "/" + bn(exam.qids.length);
-      $("#herTrack").style.width = (n/exam.qids.length*100) + "%";
-    }
-    if (timeOver || (mine.done && op.done) || d.status === "done"){ finishDuel(d); return; }
-    if (mine.done){ showWaiting(d); return; }
-    const inExam = exam && exam.mode === "duel" && exam.id === id;
-    if (!inExam && !starting){
-      starting = true;
-      if (now() < d.startAt) ping("ডুয়েল শুরু হচ্ছে! ⚔️", d.title, id);
-      bank = await loadBank(d.subj); subjId = d.subj;
-      countdown(d.startAt, () => startDuelExam(d, mine.a));
-    }
-  });
-}
-function stopWatch(){ if (watching) watching.off(); watching = null; watchingId = null; }
-function startDuelExam(d, prev){
-  runExam({ mode: "duel", id: d.id, subj: d.subj, qids: d.qids, neg: d.neg, title: d.title,
-            startAt: d.startAt, endAt: d.endAt, opp: oppIdOf(d), oppName: oppNameOf(d) });
-  if (prev) Object.entries(prev).forEach(([k,j]) => {   // restore answers after a refresh
-    exam.ans[+k] = j;
-    $$(`#q${k} .opt`).forEach(b => { b.disabled = true; if (+b.dataset.j === j) b.classList.add("sel"); });
-  });
-  updateProg();
-}
-function countdown(startAt, cb){
-  const step = () => {
-    const left = Math.ceil((startAt - now())/1000);
-    if (left <= 0){ closeModal(); cb(); return; }
-    modal(`<div class="countdown">${bn(left)}</div><p style="text-align:center">একসাথে শুরু হচ্ছে...</p>`);
-    setTimeout(step, 200);
-  };
-  step();
-}
-function showWaiting(d){
-  modal(`<h3 style="margin-top:0">জমা হয়ে গেছে ✅</h3><p>${esc(oppNameOf(d))} শেষ করার অপেক্ষা...</p><p class="hint">সময় শেষ হলে আপনা আপনি রেজাল্ট আসবে।</p>`);
-  clearInterval(waitTimer);
-  waitTimer = setInterval(async () => {   // the watcher only fires on changes, so check the clock too
-    if (now() > d.endAt + 3000){
-      clearInterval(waitTimer);
-      const fresh = (await db.ref("duels/"+d.id).once("value")).val();
-      if (fresh){ fresh.id = d.id; finishDuel(fresh); }
-    }
-  }, 2000);
-}
-
-/* Refresh-proof: find a duel that is still going on */
-async function resumeActive(){
-  const cands = [];
-  const saved = LS.get("rd_active", null);
-  if (saved){ const d = (await db.ref("duels/"+saved).once("value")).val(); if (d){ d.id = saved; cands.push(d); } }
-  const snap = await db.ref("duels").orderByKey().limitToLast(30).once("value");
-  snap.forEach(c => { const d = c.val(); d.id = c.key; if ((d.from === me.uid || d.to === me.uid) && !cands.some(x => x.id === d.id)) cands.push(d); });
-  cands.sort((a,b) => b.created - a.created);
-  for (const d of cands){
-    const fresh = Date.now() - d.created < 3*3600000;
-    if (!fresh) continue;
-    if (d.status === "pending" && Date.now() - d.created < 10*60000){
-      if (d.from === me.uid){ sentModal(d.id, d); watchDuel(d.id); } else incoming(d.id, d);
-      return;
-    }
-    if (d.status === "live"){
-      const mine = (d.p && d.p[me.uid]) || {};
-      if (now() < d.endAt && !mine.done){
-        modal(`<h3 style="margin-top:0">⚔️ একটা ডুয়েল চলছে!</h3><p><b>${esc(d.title)}</b> vs ${esc(oppNameOf(d))}</p>
-          <p class="hint">বাকি সময়: ${fmt(Math.max(0, Math.round((d.endAt - now())/1000)))}। ঘড়ি থেমে নেই!</p>
-          <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();watchDuel('${d.id}')">ফিরে যাও</button></div>`);
-      } else if (!finished.has(d.id)){
-        modal(`<h3 style="margin-top:0">শেষ ডুয়েলের রেজাল্ট রেডি</h3><p>${esc(d.title)} vs ${esc(oppNameOf(d))}</p>
-          <div class="row"><button class="btn" onclick="closeModal()">পরে</button><button class="btn gold" onclick="closeModal();watchDuel('${d.id}')">রেজাল্ট দেখো</button></div>`);
-      }
-      return;
-    }
+const isAsync = d => d.mode === "async";
+function toAns(a){ const o = {}; if (a) Object.entries(a).forEach(([k,v]) => o[+k] = v); return o; }
+function st(d){
+  const live = !isAsync(d), dur = d.mins*60000, T = now();
+  const myP = (d.p && d.p[me.uid]) || {}, opP = (d.p && d.p[oppIdOf(d)]) || {};
+  const endOf = P => live ? (d.endAt || 0) : (P.start ? P.start + dur : 0);
+  const myEnd = endOf(myP), opEnd = endOf(opP);
+  const liveStarted = live && (d.status === "live" || d.status === "done") && d.endAt;
+  const myExpired = !!myEnd && T > myEnd + 2000 && (!live || liveStarted);
+  const opExpired = !!opEnd && T > opEnd + 2000 && (!live || liveStarted);
+  const iDone = !!myP.done || myExpired, opDone = !!opP.done || opExpired;
+  const expired = d.status === "pending" && (live ? Date.now() - d.created > 10*60000 : T > d.deadline);
+  const isVoid = d.status === "declined" || d.status === "cancelled" || expired;
+  const deadlinePassed = !live && T > d.deadline;
+  let over = false;
+  if (!isVoid){
+    if (d.status === "done") over = true;
+    else if (live) over = d.status === "live" && (T > d.endAt + 3000 || (iDone && opDone));
+    else over = d.status === "accepted" && ((iDone && opDone) || (deadlinePassed && (iDone || !myP.start) && (opDone || !opP.start)));
   }
+  let canPlay = false;
+  if (!isVoid && !over && !iDone){
+    if (live) canPlay = d.status === "live" && T < d.endAt;
+    else canPlay = (myP.start && T < myEnd) || ((d.from === me.uid || d.status === "accepted") && T < d.deadline);
+  }
+  const incoming = d.status === "pending" && d.to === me.uid && !isVoid;
+  return { live, myP, opP, myEnd, iDone, opDone, isVoid, over, canPlay, incoming, deadlinePassed, myExpired };
 }
-
 function duelScores(d){
-  const pa = (d.p && d.p[d.from]) || {}, pb = (d.p && d.p[d.to]) || {};
-  const toObj = a => { const o = {}; if (a) Object.entries(a).forEach(([k,v]) => o[+k] = v); return o; };
-  const A = toObj(pa.a), B = toObj(pb.a);
-  const full = d.mins*60000;
-  return { A, B, sa: score(A, d.qids, d.neg), sb: score(B, d.qids, d.neg), ua: pa.used || full, ub: pb.used || full };
+  const b = banks[d.subj] || bank;
+  const A = toAns(d.p && d.p[d.from] && d.p[d.from].a), B = toAns(d.p && d.p[d.to] && d.p[d.to].a);
+  const pa = (d.p && d.p[d.from]) || {}, pb = (d.p && d.p[d.to]) || {}, full = d.mins*60000;
+  return { A, B, sa: scoreWith(b, A, d.qids, d.neg), sb: scoreWith(b, B, d.qids, d.neg), ua: pa.used || full, ub: pb.used || full };
 }
 function winnerOf(d){
   const r = duelScores(d);
@@ -704,38 +794,332 @@ function winnerOf(d){
   if (Math.abs(r.ua - r.ub) > 1000) return r.ua < r.ub ? d.from : d.to;
   return "draw";
 }
-async function finishDuel(d){
-  if (finished.has(d.id)) return;
-  finished.add(d.id);
-  clearInterval(waitTimer); stopWatch(); closeModal();
-  if (exam && exam.mode === "duel" && exam.id === d.id && !exam.done){   // time ran out mid-exam
-    exam.done = true; clearInterval(timerInt); recordLocal(exam);
+const myDuels = () => Object.values(duels).sort((a,b) => b.created - a.created);
+
+/* ============ FIREBASE ============ */
+function initFb(){
+  if (db) return;
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.database();
+  db.ref(".info/serverTimeOffset").on("value", s => srvOffset = s.val() || 0);
+  const pRef = db.ref("players/" + me.uid);
+  const hb = () => pRef.set({ name: me.name, seen: firebase.database.ServerValue.TIMESTAMP });
+  hb(); setInterval(hb, 30000);
+  db.ref("players").on("value", s => { players = s.val() || {}; if (curScreen() === "create") renderPlayers(); });
+  db.ref("duels").limitToLast(300).on("value", s => {
+    const all = {};
+    s.forEach(c => { const v = c.val(); if (v && (v.from === me.uid || v.to === me.uid)){ v.id = c.key; all[c.key] = v; } });
+    duels = all;
+    const first = !duelsLoaded; duelsLoaded = true;
+    processDuels(first);
+    const sc = curScreen(); if (["home","duels","history"].includes(sc)) refreshScreen(sc);
+  });
+  setInterval(() => processDuels(false), 2000);
+  setInterval(() => { const sc = curScreen(); if (sc === "duels" || sc === "home") refreshScreen(sc); }, 20000);
+}
+
+/* Runs on every data change and every 2 s: starts live duels, finishes them, fires notifications */
+function processDuels(first){
+  if (!me) return;
+  const evSeen = new Set(LS.get("rd_ev", [])), freshStore = !LS.get("rd_ev", null);
+  const fire = (key, title, body, id, popup) => {
+    if (evSeen.has(key)) return;
+    evSeen.add(key);
+    if (freshStore && !popup) return;   // very first run: don't spam old events
+    ping(title, body, id);
+    if (popup) popup();
+  };
+  for (const d of myDuels()){
+    const s = st(d), opp = oppNameOf(d);
+    const recent = Date.now() - d.created < 48*3600000;
+    // housekeeping
+    if (s.myExpired && !s.myP.done && !(exam && exam.duelId === d.id && !exam.done))
+      db.ref(`duels/${d.id}/p/${me.uid}`).update({ done: true, used: d.mins*60000 });
+    if (s.over && d.status !== "done") db.ref(`duels/${d.id}`).update({ status: "done" });
+    // live: both start together right after accepting
+    if (s.live && d.status === "live" && !s.iDone && now() < d.startAt + 10000 && !launched.has(d.id) && !(exam && !exam.done)){
+      launched.add(d.id);
+      if (sentWaiting === d.id){ sentWaiting = null; }
+      startDuel(d.id, true);
+    }
+    // in exam
+    if (exam && exam.duelId === d.id){
+      if (exam.live){
+        const n = s.opP.a ? Object.keys(s.opP.a).length : 0;
+        $("#herProg").textContent = bn(n) + "/" + bn(exam.qids.length);
+        $("#herTrack").style.width = (n/exam.qids.length*100) + "%";
+      }
+      if (s.over && !exam.done) submit(true);
+    }
+    if (s.over && waitingFor === d.id){ waitingFor = null; closeModal(); showDuelResult(d); }
+    // notifications
+    if (!recent) continue;
+    if (s.incoming) fire(`${d.id}:in`, `⚔️ ${d.fromName} তোমাকে চ্যালেঞ্জ করেছে!`, `${d.title} · ${d.qids.length} প্রশ্ন · ${d.mins} মিনিট`, d.id,
+      () => { if (!(exam && !exam.done)) challengePopup(d.id); });
+    if (d.from === me.uid && d.status === "declined") fire(`${d.id}:dec`, `${d.toName} চ্যালেঞ্জ রিজেক্ট করেছে`, d.title, d.id,
+      sentWaiting === d.id ? () => { sentWaiting = null; closeModal(); } : null);
+    if (d.from === me.uid && isAsync(d) && (d.status === "accepted" || d.status === "done")) fire(`${d.id}:acc`, `${d.toName} চ্যালেঞ্জ এক্সেপ্ট করেছে`, d.title, d.id);
+    if (isAsync(d) && s.opDone && !s.iDone && !s.over && !s.isVoid) fire(`${d.id}:op`, `${opp} শেষ করেছে, এবার তোমার পালা!`, d.title, d.id);
+    if (s.over){
+      const w = winnerOf(d);
+      fire(`${d.id}:res`, "রেজাল্ট এসেছে!", `${d.title}: ` + (w === "draw" ? "ড্র" : w === me.uid ? "তুমি জিতেছ 🏆" : `${opp} জিতেছে`), d.id);
+    }
   }
-  if (bank !== banks[d.subj]){ bank = await loadBank(d.subj); subjId = d.subj; }
-  if (d.status !== "done") db.ref("duels/"+d.id).update({ status: "done" });
-  LS.set("rd_active", null);
-  const oppName = oppNameOf(d);
-  const r = duelScores(d);
-  const iAmA = d.from === me.uid;
+  LS.set("rd_ev", [...evSeen].slice(-400));
+  if (first) resumeCheck();
+  updateBadges();
+}
+function resumeCheck(){
+  if (exam && !exam.done) return;
+  const d = myDuels().find(d => { const s = st(d); return s.canPlay && ((s.live && now() > d.startAt + 10000) || (!s.live && s.myP.start)); });
+  if (!d) return;
+  modal(`<h3 style="margin-top:0">⚔️ তোমার একটা ডুয়েল চলছে!</h3><p><b>${esc(d.title)}</b> vs ${esc(oppNameOf(d))}</p>
+    <p class="hint">বাকি সময়: ${fmtLeft(st(d).myEnd - now())}। ঘড়ি থেমে নেই!</p>
+    <div class="row"><button class="btn" onclick="closeModal()">পরে</button><button class="btn pink" onclick="closeModal();startDuel('${d.id}',true)">ফিরে যাও</button></div>`);
+}
+
+/* ============ DUEL ACTIONS ============ */
+function renderPlayers(){
+  const list = Object.entries(players).filter(([u]) => u !== me.uid);
+  if (!list.length){ $("#plist").innerHTML = '<p class="hint">আর কেউ এখনো জয়েন করেনি। তোমার বন্ধুকে লিংক পাঠাও।</p>'; $("#sendBtn").disabled = true; return; }
+  $("#plist").innerHTML = list.map(([u,p]) => {
+    const on = now() - (p.seen||0) < 70000;
+    return `<button class="pl" data-u="${u}" aria-pressed="${oppSel===u}"><span><span class="dot ${on?"on":""}"></span>${esc(p.name)}</span><span class="hint">${on?"অনলাইন":"অফলাইন"}</span></button>`;
+  }).join("");
+  $$("#plist .pl").forEach(b => b.onclick = () => { oppSel = b.dataset.u; renderPlayers(); });
+  $("#sendBtn").disabled = !oppSel;
+}
+$$("#modeSeg button").forEach(b => b.onclick = () => {
+  createMode = b.dataset.mode;
+  $$("#modeSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  $("#deadlineBox").classList.toggle("hidden", createMode !== "async");
+  $("#modeHint").textContent = createMode === "live" ? "দুজন একসাথে শুরু করবে। ওকে অনলাইনে থাকতে হবে।"
+    : "যে যার সময়মতো দেবে। দুজনেরই শেষ হলে রেজাল্ট দেখা যাবে।";
+});
+async function sendDuel(){
+  if (!db || !oppSel || !players[oppSel]) return;
+  const s = settings(); if (!s.mins) s.mins = 10;
+  const qids = pickQuestions(s.count);
+  if (!qids.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
+  const ref = db.ref("duels").push();
+  const d = { from: me.uid, fromName: me.name, to: oppSel, toName: players[oppSel].name, subj: subjId, qids,
+              mins: s.mins, neg: s.neg, title: titleFor(qids), chs: chLabels(), paper, srcLabel: srcLabel(),
+              mode: createMode, status: "pending", created: now() };
+  if (createMode === "async") d.deadline = now() + (+$("#fDeadline").value)*3600000;
+  await ref.set(d);
+  if (createMode === "live"){
+    sentWaiting = ref.key;
+    modal(`<h3 style="margin-top:0">চ্যালেঞ্জ পাঠানো হয়েছে</h3><p>${esc(d.toName)} এক্সেপ্ট করলে একসাথে শুরু হবে।</p>
+      <div class="info">${infoHtml(d)}</div>
+      <div class="row" style="margin-top:12px"><button class="btn" onclick="closeModal();go('duels')">ঠিক আছে</button><button class="btn" onclick="cancelDuel('${ref.key}')">বাতিল</button></div>`);
+  } else {
+    modal(`<h3 style="margin-top:0">চ্যালেঞ্জ পাঠানো হয়েছে ✅</h3><p>তুমি কি এখনই দিবে? ${esc(d.toName)} এক্সেপ্ট করে নিজের সময়ে দেবে।</p>
+      <div class="row"><button class="btn" onclick="closeModal();go('duels')">পরে দেবো</button><button class="btn pink" onclick="closeModal();askStart('${ref.key}')">এখনই দেবো</button></div>`);
+  }
+}
+function cancelDuel(id){ db.ref("duels/"+id).update({ status: "cancelled" }); if (sentWaiting === id) sentWaiting = null; closeModal(); toast("বাতিল করা হয়েছে"); }
+function infoHtml(d){
+  const mode = isAsync(d) ? `🕒 যখন খুশি (বাকি ${fmtLeft(d.deadline - now())})` : "⚡ লাইভ (একসাথে)";
+  return `মোড: <b>${mode}</b><br>
+    অধ্যায়: <b>${esc(chText(d.chs, d.paper))}</b><br>
+    উৎস: <b>${esc(d.srcLabel || "সব প্রশ্ন")}</b><br>
+    <b>${bn(d.qids.length)}</b> প্রশ্ন · <b>${bn(d.mins)}</b> মিনিট · নেগেটিভ মার্কিং ${d.neg ? "<b>আছে</b>" : "নেই"}`;
+}
+function challengePopup(id){
+  const d = duels[id]; if (!d) return;
+  modal(`<h3 style="margin-top:0">⚔️ ${esc(d.fromName)} তোমাকে চ্যালেঞ্জ করেছে!</h3>
+    <div class="info">${infoHtml(d)}</div>
+    <div class="row" style="margin-top:14px"><button class="btn" onclick="rejectDuel('${id}')">রিজেক্ট</button><button class="btn pink" onclick="acceptDuel('${id}')">এক্সেপ্ট</button></div>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeModal()">পরে দেখবো</button>`);
+}
+async function acceptDuel(id){
+  closeModal();
+  const d = duels[id];
+  if (!d || st(d).isVoid || d.status !== "pending") return toast("এই চ্যালেঞ্জ আর নেই");
+  if (isAsync(d)){
+    await db.ref("duels/"+id).update({ status: "accepted", acceptedAt: now() });
+    modal(`<h3 style="margin-top:0">এক্সেপ্ট করা হয়েছে ✅</h3><p>এখনই দিবে, নাকি পরে? শেষ সময়: ${fmtLeft(d.deadline - now())} বাকি।</p>
+      <div class="row"><button class="btn" onclick="closeModal()">পরে</button><button class="btn pink" onclick="closeModal();askStart('${id}')">এখনই</button></div>`);
+  } else {
+    const startAt = now() + 6000;
+    await db.ref("duels/"+id).update({ status: "live", startAt, endAt: startAt + d.mins*60000 });
+  }
+}
+function rejectDuel(id){ closeModal(); db.ref("duels/"+id).update({ status: "declined" }); toast("রিজেক্ট করা হয়েছে"); }
+function askStart(id){
+  const d = duels[id]; if (!d) return;
+  if (st(d).myP.start) return startDuel(id);
+  modal(`<h3 style="margin-top:0">শুরু করবে?</h3><p>শুরু করলেই <b>${bn(d.mins)} মিনিটের</b> ঘড়ি চালু হবে। মাঝপথে বের হলেও ঘড়ি চলতেই থাকবে।</p>
+    <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();startDuel('${id}')">শুরু!</button></div>`);
+}
+async function startDuel(id, auto){
+  const d = duels[id]; if (!d) return;
+  const s = st(d);
+  if (!s.canPlay) return toast("এই ডুয়েল এখন দেওয়া যাবে না");
+  await loadBank(d.subj);
+  const base = { duelId: id, subj: d.subj, qids: d.qids, neg: d.neg, title: d.title, oppName: oppNameOf(d), prev: toAns(s.myP.a) };
+  if (s.live){
+    const go_ = () => runExam(Object.assign(base, { live: true, startAt: d.startAt, endAt: d.endAt }));
+    if (now() < d.startAt) countdown(d.startAt, go_); else go_();
+  } else {
+    let start = s.myP.start;
+    if (!start){ start = now(); await db.ref(`duels/${id}/p/${me.uid}/start`).set(start); }
+    runExam(Object.assign(base, { live: false, startAt: start, endAt: start + d.mins*60000 }));
+  }
+}
+function countdown(startAt, cb){
+  modalLocked = true;
+  const step = () => {
+    const left = Math.ceil((startAt - now())/1000);
+    if (left <= 0){ modalLocked = false; closeModal(); cb(); return; }
+    modal(`<div class="countdown">${bn(left)}</div><p style="text-align:center">একসাথে শুরু হচ্ছে...</p>`);
+    setTimeout(step, 200);
+  };
+  step();
+}
+function openDuel(id){
+  const d = duels[id]; if (!d) return;
+  const s = st(d);
+  if (s.over || s.iDone) return showDuelResult(d);
+  if (s.canPlay) return s.live ? startDuel(id) : askStart(id);
+}
+function showDuelResult(d){
+  d = duels[d.id] || d;
+  const s = st(d), opp = oppNameOf(d);
+  const r = duelScores(d), iAmA = d.from === me.uid;
   const mine = iAmA ? r.A : r.B, hers = iAmA ? r.B : r.A;
   const ms = iAmA ? r.sa : r.sb, hs = iAmA ? r.sb : r.sa;
   const mu = iAmA ? r.ua : r.ub, hu = iAmA ? r.ub : r.ua;
-  const w = winnerOf(d);
-  const head = w === "draw" ? "ড্র! 🤝" : (w === me.uid ? "তুমি জিতেছ! 🏆" : `${esc(oppName)} জিতেছে`);
-  ping("রেজাল্ট এসেছে!", w === "draw" ? "ড্র!" : (w === me.uid ? "তুমি জিতেছ! 🏆" : `${oppName} জিতেছে`), d.id);
-  $("#resTop").innerHTML = `<div class="blk" style="text-align:center;padding-top:16px">
-    <div class="crown">${head}</div>
-    <div class="vs">
-      <div class="side me"><div>তুমি</div><div class="big">${bn(ms.s)}</div><div>${bn(ms.c)} ঠিক · ${bn(ms.w)} ভুল</div><div class="hint" style="color:inherit">${fmt(Math.round(mu/1000))}</div></div>
-      <div class="vstxt px">VS</div>
-      <div class="side her"><div>${esc(oppName)}</div><div class="big">${bn(hs.s)}</div><div>${bn(hs.c)} ঠিক · ${bn(hs.w)} ভুল</div><div class="hint" style="color:inherit">${fmt(Math.round(hu/1000))}</div></div>
-    </div>
-    <p class="hint" style="padding:0 12px 12px">${esc(d.title)} · নম্বর সমান হলে যে কম সময় নিয়েছে সে জিতবে</p></div>`;
-  $("#rvDiff").classList.remove("hidden");
-  lastReview = { qids: d.qids, mine, hers, herName: oppName };
-  rvFilter = "all"; $$("[data-rv]").forEach(x => x.setAttribute("aria-pressed", x.dataset.rv==="all"));
-  renderReview(); go("result");
+  if (!s.over){   // only my side is finished: keep hers hidden
+    $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
+      <p style="margin:0 0 8px;font-weight:700">${esc(d.title)}</p>
+      <div class="crown">তোমার স্কোর: ${bn(ms.s)} / ${bn(d.qids.length)}</div>
+      <div class="stats"><div><b>${bn(ms.c)}</b>সঠিক</div><div><b>${bn(ms.w)}</b>ভুল</div><div><b>${bn(ms.skip)}</b>বাদ</div></div>
+      <p class="hint">🔒 ${esc(opp)} শেষ করলে পুরো রেজাল্ট দেখবে, নোটিফিকেশন পাবে।</p></div>`;
+    $("#rvDiff").classList.add("hidden");
+    lastReview = { subj: d.subj, qids: d.qids, mine, hers: null };
+  } else {
+    const w = winnerOf(d);
+    const head = w === "draw" ? "ড্র! 🤝" : (w === me.uid ? "তুমি জিতেছ! 🏆" : `${esc(opp)} জিতেছে`);
+    $("#resTop").innerHTML = `<div class="blk" style="text-align:center;padding-top:16px">
+      <div class="crown">${head}</div>
+      <div class="vs">
+        <div class="side me"><div>তুমি</div><div class="big">${bn(ms.s)}</div><div>${bn(ms.c)} ঠিক · ${bn(ms.w)} ভুল</div><div class="hint" style="color:inherit">${fmt(Math.round(mu/1000))}</div></div>
+        <div class="vstxt px">VS</div>
+        <div class="side her"><div>${esc(opp)}</div><div class="big">${bn(hs.s)}</div><div>${bn(hs.c)} ঠিক · ${bn(hs.w)} ভুল</div><div class="hint" style="color:inherit">${fmt(Math.round(hu/1000))}</div></div>
+      </div>
+      <p class="hint" style="padding:0 12px 12px">${esc(d.title)} · নম্বর সমান হলে যে কম সময় নিয়েছে সে জিতবে</p></div>`;
+    $("#rvDiff").classList.remove("hidden");
+    lastReview = { subj: d.subj, qids: d.qids, mine, hers, herName: opp };
+    const ev = new Set(LS.get("rd_ev", [])); ev.add(d.id + ":res"); LS.set("rd_ev", [...ev].slice(-400));
+  }
   exam = null;
+  openResult("duels");
+}
+
+/* ============ DUEL LISTS ============ */
+function duelCard(d){
+  const s = st(d), opp = oppNameOf(d);
+  const tag = isAsync(d) ? '<span class="mtag async">যখন খুশি</span>' : '<span class="mtag live">লাইভ</span>';
+  let status = "", acts = "";
+  if (s.incoming){
+    status = `${esc(d.fromName)} তোমাকে চ্যালেঞ্জ করেছে`;
+    acts = `<button class="btn" onclick="rejectDuel('${d.id}')">রিজেক্ট</button><button class="btn pink" onclick="acceptDuel('${d.id}')">এক্সেপ্ট</button>`;
+  } else if (d.status === "pending" && d.from === me.uid && !isAsync(d)){
+    status = `${esc(opp)} এর এক্সেপ্টের অপেক্ষা...`;
+    acts = `<button class="btn" onclick="cancelDuel('${d.id}')">বাতিল</button>`;
+  } else if (s.canPlay){
+    const started = s.live || s.myP.start;
+    status = started ? `<b>চলছে!</b> বাকি ${fmtLeft(s.myEnd - now())}` : (d.status === "pending" ? `${esc(opp)} এখনো এক্সেপ্ট করেনি। তুমি আগে দিয়ে রাখতে পারো` : "তোমার পালা!");
+    acts = `<button class="btn pink" onclick="openDuel('${d.id}')">${started ? "ফিরে যাও" : "শুরু করো"}</button>`;
+    if (d.status === "pending" && d.from === me.uid) acts += `<button class="btn" onclick="cancelDuel('${d.id}')">বাতিল</button>`;
+  } else if (s.iDone && !s.over){
+    status = d.status === "pending" ? `তুমি দিয়েছ। ${esc(opp)} এর এক্সেপ্টের অপেক্ষা` : `তুমি দিয়েছ। ${esc(opp)} এর শেষ করার অপেক্ষা`;
+    acts = `<button class="btn" onclick="openDuel('${d.id}')">আমার উত্তর দেখো</button>`;
+  } else return "";
+  return `<div class="blk card"><div class="top"><span class="nm">vs ${esc(opp)}</span>${tag}</div>
+    <div class="info">${s.incoming ? infoHtml(d) : `<b>${esc(d.title)}</b> · ${bn(d.qids.length)} প্রশ্ন · ${bn(d.mins)} মিনিট`}${isAsync(d) && !s.incoming && !s.myP.start ? `<br>শেষ সময়: ${fmtLeft(d.deadline - now())} বাকি` : ""}</div>
+    <p style="margin:8px 0 0">${status}</p><div class="acts">${acts}</div></div>`;
+}
+function renderDuels(){
+  const all = myDuels();
+  const pend = all.filter(d => { const s = st(d); return !s.isVoid && !s.over; }).map(duelCard).join("");
+  $("#pendingList").innerHTML = pend || '<p class="hint">কিছু বাকি নেই। একটা চ্যালেঞ্জ পাঠাও! 😏</p>';
+  const done = all.filter(d => st(d).over).slice(0, 40);
+  $("#doneList").innerHTML = done.length ? done.map(d => {
+    const r = duelScores(d), iA = d.from === me.uid, w = winnerOf(d);
+    const res = w === me.uid ? '<span class="res-w">জয়</span>' : w === "draw" ? '<span class="res-d">ড্র</span>' : '<span class="res-l">হার</span>';
+    return `<div class="blk card clickrow" onclick="showDuelResult(duels['${d.id}'])"><div class="top"><span class="nm">vs ${esc(oppNameOf(d))}</span><span>${res} <b>${bn(iA ? r.sa.s : r.sb.s)} - ${bn(iA ? r.sb.s : r.sa.s)}</b></span></div>
+      <div class="info">${esc(d.title)} · ${dateBn(d.created)}</div></div>`;
+  }).join("") : '<p class="hint">এখনো কোনো ডুয়েল শেষ হয়নি।</p>';
+  const perm = "Notification" in window && Notification.permission === "default";
+  $("#permHint").innerHTML = perm ? `<button class="btn" style="width:100%;margin-top:12px" onclick="askPerm()">🔔 ফোনে নোটিফিকেশন চালু করো</button>` : "";
+}
+function actionCount(){
+  return myDuels().filter(d => { const s = st(d); return s.incoming || (s.canPlay && !(d.status === "pending" && d.from === me.uid && st(d).myP.start)); }).length;
+}
+
+/* ============ HOME / HISTORY ============ */
+function renderHome(){
+  const n = actionCount();
+  $("#duelCnt").textContent = bn(n); $("#duelCnt").classList.toggle("hidden", !n);
+  $("#tsDuel").textContent = n ? `${bn(n)}টা তোমার অপেক্ষায়` : "বন্ধুর সাথে লড়াই";
+  const wr = LS.get("rd_wrong_"+subjId, []).length;
+  $("#tsRev").textContent = wr ? `${bn(wr)}টা ভুল প্রশ্ন জমা` : "যেগুলো ভুল করেছ";
+  const ps = LS.get("rd_psess", []).length;
+  $("#tsPractice").textContent = ps ? `${bn(ps)}টা অনুশীলন দেওয়া` : "একা প্র্যাকটিস";
+}
+function renderHistory(){
+  const b = banks[subjId] || bank;
+  const st_ = LS.get("rd_chstats_"+subjId, {});
+  const rows = Object.entries(st_).sort((a,c) => (a[1][1]/a[1][0]) - (c[1][1]/c[1][0]));
+  $("#chStats").innerHTML = rows.length ? rows.map(([ch,[t,c]]) =>
+    `<div class="hrow"><span>${esc(b.chapters[ch].n)}</span><span><b>${bn(Math.round(c/t*100))}%</b> <span class="hint">(${bn(c)}/${bn(t)})</span></span></div>`).join("")
+    : '<p class="hint">এখনো কিছু নেই।</p>';
+  const done = myDuels().filter(d => st(d).over);
+  const tally = {}; let W=0, Lo=0, D=0;
+  done.forEach(d => { const opp = oppNameOf(d), w = winnerOf(d); tally[opp] = tally[opp] || [0,0,0];
+    const k = w === me.uid ? 0 : w === "draw" ? 2 : 1; tally[opp][k]++; k===0?W++:k===1?Lo++:D++; });
+  $("#h2h").innerHTML = Object.keys(tally).length ? Object.entries(tally).map(([n,[a,b2,dr]]) =>
+    `<div class="hrow"><span>তুমি vs ${esc(n)}</span><span><b style="color:var(--p1)">${bn(a)}</b> - <b style="color:var(--p2)">${bn(b2)}</b>${dr ? ` <span class="hint">(${bn(dr)} ড্র)</span>` : ""}</span></div>`).join("")
+    : "কোনো ডুয়েল এখনো হয়নি।";
+  const ps = LS.get("rd_psess", []);
+  const answered = Object.values(st_).reduce((a,[t]) => a+t, 0), correct = Object.values(st_).reduce((a,[,c]) => a+c, 0);
+  $("#sumStats").innerHTML = `<div class="stats"><div><b>${bn(done.length)}</b>ডুয়েল</div><div><b>${bn(W)}</b>জয়</div><div><b>${bn(Lo)}</b>হার</div></div>
+    <div class="stats"><div><b>${bn(ps.length)}</b>অনুশীলন</div><div><b>${bn(answered)}</b>উত্তর দিয়েছ</div><div><b>${bn(answered ? Math.round(correct/answered*100) : 0)}%</b>নির্ভুল</div></div>`;
+}
+
+/* ============ INBOX (bell) ============ */
+function updateBadges(){
+  if (!me) return;
+  const inc = myDuels().filter(d => st(d).incoming).length;
+  const unread = LS.get("rd_notifs", []).filter(n => !n.read).length;
+  const n = Math.max(inc, unread);
+  $("#bellCnt").textContent = bn(n); $("#bellCnt").classList.toggle("hidden", !n);
+  if (curScreen() === "home"){ const a = actionCount(); $("#duelCnt").textContent = bn(a); $("#duelCnt").classList.toggle("hidden", !a); }
+}
+function openInbox(){
+  const inc = myDuels().filter(d => st(d).incoming);
+  const notifs = LS.get("rd_notifs", []);
+  const perm = "Notification" in window && Notification.permission === "default";
+  let html = `<h3 style="margin-top:0">নোটিফিকেশন</h3>`;
+  if (inc.length) html += `<div class="sec-title" style="margin-top:0">নতুন চ্যালেঞ্জ</div>` + inc.map(d =>
+    `<div class="card" style="border:3px solid var(--line);background:var(--panel2)"><div class="nm">⚔️ ${esc(d.fromName)}</div><div class="info">${infoHtml(d)}</div>
+      <div class="acts"><button class="btn" onclick="rejectDuel('${d.id}')">রিজেক্ট</button><button class="btn pink" onclick="acceptDuel('${d.id}')">এক্সেপ্ট</button></div></div>`).join("");
+  if (notifs.length) html += `<div class="sec-title">সাম্প্রতিক</div>` + notifs.map(n =>
+    `<div class="nrow clickrow ${n.read ? "" : "unread"}" onclick="closeModal();go('duels')">${esc(n.title)}<br><span class="hint">${esc(n.body)} · ${dateBn(n.t)}</span></div>`).join("");
+  if (!inc.length && !notifs.length) html += `<p class="hint">কোনো নোটিফিকেশন নেই।</p>`;
+  if (perm) html += `<button class="btn" style="width:100%;margin-top:12px" onclick="askPerm()">🔔 ফোনে নোটিফিকেশন চালু করো</button>`;
+  html += `<button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeModal()">বন্ধ করো</button>`;
+  modal(html);
+  LS.set("rd_notifs", notifs.map(n => Object.assign(n, { read: true })));
+  updateBadges();
+}
+async function askPerm(){
+  if (!("Notification" in window)) return toast("এই ব্রাউজারে নোটিফিকেশন সাপোর্ট নেই");
+  const r = await Notification.requestPermission();
+  toast(r === "granted" ? "নোটিফিকেশন চালু হয়েছে ✅" : "নোটিফিকেশন বন্ধ রাখা হলো");
+  closeModal(); refreshScreen();
 }
 
 /* ============ ALERTS: sound, vibration, notification ============ */
@@ -750,24 +1134,15 @@ function beep(){
     o.connect(g).connect(actx.destination); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + 0.16);
   });
 }
-function ping(title, body, tag){
+function ping(title, body, id){
+  const list = LS.get("rd_notifs", []);
+  list.unshift({ t: Date.now(), title, body, id, read: false });
+  LS.set("rd_notifs", list.slice(0, 25));
   beep();
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-  if (document.hidden && "Notification" in window && Notification.permission === "granted" && navigator.serviceWorker){
-    navigator.serviceWorker.ready.then(r => r.showNotification(title, { body, tag: "rd-" + tag, renotify: true, icon: "icons/icon-192.png", badge: "icons/icon-192.png", vibrate: [200,100,200] })).catch(() => {});
-  }
-}
-async function toggleBell(){
-  if (!("Notification" in window)){ alert("এই ব্রাউজারে নোটিফিকেশন সাপোর্ট নেই।"); return; }
-  if (Notification.permission === "granted"){ alert("নোটিফিকেশন চালু আছে ✅\nবন্ধ করতে চাইলে ব্রাউজারের সাইট সেটিংস থেকে করো।"); return; }
-  if (Notification.permission === "denied"){ alert("নোটিফিকেশন ব্লক করা আছে। ব্রাউজারের সাইট সেটিংস থেকে Allow করো।"); return; }
-  await Notification.requestPermission();
-  updateBell();
-}
-function updateBell(){
-  const on = "Notification" in window && Notification.permission === "granted";
-  $("#bellBtn").setAttribute("aria-pressed", on);
-  $("#bellBtn").title = on ? "নোটিফিকেশন চালু" : "নোটিফিকেশন চালু করো";
+  if (document.hidden && "Notification" in window && Notification.permission === "granted" && navigator.serviceWorker)
+    navigator.serviceWorker.ready.then(r => r.showNotification(title, { body, tag: "rd-" + id, renotify: true, icon: "icons/icon-192.png", badge: "icons/icon-192.png", vibrate: [200,100,200] })).catch(() => {});
+  updateBadges();
 }
 
 /* ============ THEME ============ */
@@ -784,61 +1159,38 @@ function toggleTheme(){
   LS.set("rd_theme", next); applyTheme(next);
 }
 
-/* ============ INSTALL BUTTON ============ */
+/* ============ INSTALL ============ */
 let installEvt = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("#installBtn").classList.remove("hidden"); });
 window.addEventListener("appinstalled", () => $("#installBtn").classList.add("hidden"));
 async function doInstall(){ if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $("#installBtn").classList.add("hidden"); }
 
-/* ============ HISTORY ============ */
-async function renderHistory(){
-  const st = LS.get("rd_chstats_"+subjId, {});
-  const rows = Object.entries(st).sort((a,b) => (a[1][1]/a[1][0]) - (b[1][1]/b[1][0]));
-  $("#chStats").innerHTML = rows.length ? rows.map(([ch,[t,c]]) =>
-    `<div class="hrow"><span>${esc(bank.chapters[ch].n)}</span><span><b>${bn(Math.round(c/t*100))}%</b> <span class="hint">(${bn(c)}/${bn(t)})</span></span></div>`).join("")
-    : '<p class="hint">এখনো কিছু নেই।</p>';
-  if (!db){ $("#hList").innerHTML = '<p class="hint">Firebase সেটআপ হলে এখানে ডুয়েল দেখাবে।</p>'; return; }
-  const snap = await db.ref("duels").orderByKey().limitToLast(200).once("value");
-  const all = []; snap.forEach(c => { const d = c.val(); if (d.status !== "done" && !(d.status === "live" && now() > d.endAt + 5000)) return;
-    if (d.from === me.uid || d.to === me.uid) all.push(d); });
-  all.reverse();
-  const tally = {};
-  all.forEach(d => { const opp = d.from === me.uid ? d.toName : d.fromName; const w = winnerOf(d);
-    tally[opp] = tally[opp] || [0,0,0]; tally[opp][w === me.uid ? 0 : w === "draw" ? 2 : 1]++; });
-  $("#h2h").innerHTML = Object.keys(tally).length ? Object.entries(tally).map(([n,[a,b,dr]]) =>
-    `<div class="hrow"><span>তুমি vs ${esc(n)}</span><span><b style="color:var(--p1)">${bn(a)}</b> - <b style="color:var(--p2)">${bn(b)}</b>${dr ? ` <span class="hint">(${bn(dr)} ড্র)</span>` : ""}</span></div>`).join("")
-    : "কোনো ডুয়েল এখনো হয়নি।";
-  $("#hList").innerHTML = all.slice(0,20).map(d => {
-    const r = duelScores(d), iA = d.from === me.uid, w = winnerOf(d);
-    return `<div class="hrow"><span>${esc(d.title)}<br><span class="hint">${new Date(d.created).toLocaleDateString("bn-BD")}</span></span>
-      <span style="text-align:right"><b>${bn(iA ? r.sa.s : r.sb.s)} - ${bn(iA ? r.sb.s : r.sa.s)}</b><br><span class="hint">${w === me.uid ? "জয়" : w === "draw" ? "ড্র" : "হার"}</span></span></div>`;
-  }).join("") || '<p class="hint">এখনো কিছু নেই।</p>';
-}
-
 /* ============ MODAL ============ */
 function modal(html){ $("#modalBody").innerHTML = html; $("#modal").classList.remove("hidden"); }
-function closeModal(){ $("#modal").classList.add("hidden"); }
+function closeModal(){ if (modalLocked) return; $("#modal").classList.add("hidden"); }
 
 /* ============ BOOT ============ */
-function refreshHome(){
-  $("#meBadge").textContent = me ? me.name : "";
-  $("#meBadge").classList.toggle("hidden", !me);
-  if (curTab() === "duel") renderPlayers();
-  if (curTab() === "history") renderHistory();
-  if (bank) updatePool();
-}
 applyTheme(LS.get("rd_theme", null));
+let booted = false;
 async function boot(){
-  updateBell();
-  if (!me || !me.name){ go("setup"); return; }
+  if (!me || !me.name){ render(); return; }
+  if (booted) return; booted = true;
+  $("#bellBtn").classList.remove("hidden");
   $("#fSubject").innerHTML = SUBJECTS.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join("");
-  bank = await loadBank(subjId);
+  try {
+    bank = await loadBank(subjId);
+  } catch(e){
+    booted = false;
+    $("#s-home").classList.remove("hidden");
+    $("#homeAlert").innerHTML = `<div class="blk panel" style="margin-top:16px"><b>প্রশ্ন লোড হয়নি 😕</b><p class="hint">data/bio.json ফাইলটা পাওয়া যায়নি। GitHub এ data ফোল্ডারের ভেতরে bio.json আছে কিনা দেখো, তারপর পেজ রিফ্রেশ করো।</p><button class="btn" onclick="location.reload()">আবার চেষ্টা করো</button></div>`;
+    return;
+  }
   $("#srcNote").textContent = "প্রশ্নের উৎস: " + bank.source + " · " + bn(bank.q.length) + "টি প্রশ্ন";
   renderChips();
   try { initFb(); } catch(e){ console.error(e); }
-  go("home");
+  render();
 }
-window.addEventListener("beforeunload", e => { if (exam && !exam.done){ e.preventDefault(); e.returnValue = ""; } });
+window.addEventListener("beforeunload", e => { if (exam && !exam.done && !exam.duelId){ e.preventDefault(); e.returnValue = ""; } });
 boot();
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
