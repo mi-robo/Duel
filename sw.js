@@ -1,5 +1,5 @@
 // Robo Duel service worker: works offline for practice, always tries fresh code first.
-const CACHE = "robo-duel-v1";
+const CACHE = "robo-duel-v2";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./data/bio.json", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -23,4 +23,13 @@ self.addEventListener("fetch", e => {
     if (res.ok || res.type === "opaque") { const cp = res.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); }
     return res;
   }).catch(() => caches.match(e.request).then(r => r || caches.match("./index.html"))));
+});
+
+// Tap on a notification: open or focus the app
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  e.waitUntil(clients.matchAll({ type: "window", includeUncontrolled: true }).then(list => {
+    for (const c of list) if ("focus" in c) return c.focus();
+    return clients.openWindow("./");
+  }));
 });
