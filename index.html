@@ -288,7 +288,8 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
             <option value="t:medical">মেডিকেল ও ডেন্টাল</option>
             <option value="t:varsity">ভার্সিটি (সব)</option>
             <option value="t:board">HSC বোর্ড</option>
-            <option value="t:book">পাঠ্যবই ও গাইডের প্রশ্ন</option>
+            <option value="t:engineering">ইঞ্জিনিয়ারিং</option>
+              <option value="t:book">পাঠ্যবই ও গাইডের প্রশ্ন</option>
             <option value="s:DU">ঢাবি (DU)</option><option value="s:JU">জাবি (JU)</option><option value="s:RU">রাবি (RU)</option>
             <option value="s:CU">চবি (CU)</option><option value="s:GST">গুচ্ছ (GST)</option><option value="s:DU7">ঢাবি ৭ কলেজ</option>
           </select></div>
@@ -390,6 +391,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
               <option value="t:medical">মেডিকেল ও ডেন্টাল</option>
               <option value="t:varsity">ভার্সিটি (সব)</option>
               <option value="t:board">HSC বোর্ড</option>
+              <option value="t:engineering">ইঞ্জিনিয়ারিং</option>
               <option value="t:book">পাঠ্যবই ও গাইডের প্রশ্ন</option>
             </optgroup>
             <optgroup label="ভার্সিটি অনুযায়ী">
@@ -444,8 +446,10 @@ const FIREBASE_CONFIG = {
   appId: "1:871735592688:web:eb53c725038c565b272435"
 };
 const SUBJECTS = [
-  { id: "bio", name: "জীববিজ্ঞান", file: "data/bio.json" }
-  // later: { id:"phy", name:"পদার্থবিজ্ঞান", file:"data/phy.json" },
+  { id: "bio", name: "জীববিজ্ঞান", file: "data/bio.json" },
+  { id: "phy", name: "পদার্থবিজ্ঞান", file: "data/phy.json" },
+  { id: "chem", name: "রসায়ন", file: "data/chem.json" },
+  { id: "math", name: "উচ্চতর গণিত", file: "data/math.json" }
 ];
 
 /* ============ HELPERS ============ */
@@ -606,7 +610,7 @@ async function loadBank(id){
   d.idx = new Map(d.q.map((q,i) => [q[7], i]));
   banks[id] = d; return d;
 }
-function tgtOf(b, sec){ const n = b.secs[sec]; return n === "MEDICAL" ? "medical" : n === "BOARD" ? "board" : (n === "BOOK" || n === "GUIDE") ? "book" : "varsity"; }
+function tgtOf(b, sec){ const n = b.secs[sec]; return n === "MEDICAL" ? "medical" : n === "BOARD" ? "board" : n === "ENGG" ? "engineering" : (n === "BOOK" || n === "GUIDE") ? "book" : "varsity"; }
 function srcMatch(b, q, src){
   if (src.startsWith("t:")) return tgtOf(b, q[5]) === src.slice(2);
   if (src.startsWith("s:")) return q[5] === b.secs.indexOf(src.slice(2));
@@ -633,7 +637,21 @@ $$("[data-paper]").forEach(b => b.onclick = () => {
 });
 $("#fSrc").onchange = updatePool;
 $("#fTime").onchange = () => $("#fTimeCustom").classList.toggle("hidden", $("#fTime").value !== "custom");
-$("#fSubject").onchange = async () => { subjId = $("#fSubject").value; bank = await loadBank(subjId); pickedCh.clear(); renderChips(); };
+$("#fSubject").onchange = async () => {
+  const id = $("#fSubject").value;
+  try { bank = await loadBank(id); } catch(e){ toast("এই বিষয়ের প্রশ্ন এখনো আপলোড হয়নি"); $("#fSubject").value = subjId; return; }
+  subjId = id; pickedCh.clear(); paper = 0;
+  $$("[data-paper]").forEach(x => x.setAttribute("aria-pressed", x.dataset.paper === "0"));
+  renderChips(); srcNoteUpdate();
+};
+function srcNoteUpdate(){ $("#srcNote").textContent = "প্রশ্নের উৎস: " + bank.source + " · " + bn(bank.q.length) + "টি প্রশ্ন"; }
+/* other subjects' banks are fetched only when something on screen needs them (old duels, history) */
+const bankWait = {};
+function ensureBanks(ids){
+  const need = [...new Set(ids)].filter(id => id && !banks[id] && !bankWait[id] && SUBJECTS.some(s => s.id === id));
+  need.forEach(id => { bankWait[id] = loadBank(id).then(() => refreshScreen()).catch(() => {}); });
+  return need.length === 0;
+}
 function pool(){
   const src = $("#fSrc").value, ids = [];
   bank.q.forEach((q,i) => {
@@ -719,6 +737,7 @@ function savePractice(p){
   udSave();
 }
 function renderPracticeList(){
+  ensureBanks(UD.psess.map(p => p.subj));
   const list = UD.psess;
   const tag = { solo: " · একটা একটা", rev: " · রিভিশন" };
   $("#practiceList").innerHTML = list.length ? list.map((p,i) => {
@@ -727,7 +746,7 @@ function renderPracticeList(){
       <div class="info">${dateBn(p.t)} · ${bn(r.w)} ভুল${p.type === "exam" ? ` · ${bn(r.skip)} বাদ` : ""}</div></div>`;
   }).join("") : '<p class="hint">এখনো কোনো অনুশীলন নেই।</p>';
 }
-function openPractice(i){ const p = UD.psess[i]; if (p) showPracticeResult(Object.assign({}, p, { qids: toIdx(p.subj, p.ids) }), false, "practice"); }
+function openPractice(i){ const p = UD.psess[i]; if (p && !banks[p.subj]){ loadBank(p.subj).then(() => openPractice(i)); return; } if (p) showPracticeResult(Object.assign({}, p, { qids: toIdx(p.subj, p.ids) }), false, "practice"); }
 
 /* ---- one by one ---- */
 function startSolo(list, kind, back){
@@ -921,7 +940,9 @@ $$("#rvKindSeg button").forEach(b => b.onclick = () => { rvKind = b.dataset.k; r
 $$("#rvModeSeg button").forEach(b => b.onclick = () => { rvMode = b.dataset.m; renderRevision(); });
 $("#rvSrc").onchange = () => $("#rvPoolN").textContent = bn(rvPool().length);
 $("#rvSubject").onchange = async () => {
-  subjId = $("#rvSubject").value; bank = await loadBank(subjId);
+  const id = $("#rvSubject").value;
+  try { bank = await loadBank(id); } catch(e){ toast("এই বিষয়ের প্রশ্ন এখনো আপলোড হয়নি"); $("#rvSubject").value = subjId; return; }
+  subjId = id; srcNoteUpdate();
   $("#fSubject").value = subjId; pickedCh.clear(); renderChips(); rvCh.clear(); renderRevision();
 };
 function startRevision(){
@@ -1146,6 +1167,7 @@ function st(d){
   return { live, myP, opP, myEnd, iDone, opDone, isVoid, over, canPlay, incoming, deadlinePassed, myExpired };
 }
 function duelScores(d){
+  ensureBanks([d.subj]);
   const b = banks[d.subj] || bank, idx = dIdx(d);
   const A = toAns(d.p && d.p[d.from] && d.p[d.from].a), B = toAns(d.p && d.p[d.to] && d.p[d.to].a);
   const pa = (d.p && d.p[d.from]) || {}, pb = (d.p && d.p[d.to]) || {}, full = d.mins*60000;
@@ -1229,7 +1251,7 @@ function processDuels(first){
       sentWaiting === d.id ? () => { sentWaiting = null; closeModal(); } : null);
     if (d.from === me.uid && isAsync(d) && (d.status === "accepted" || d.status === "done")) fire(`${d.id}:acc`, `${d.toName} চ্যালেঞ্জ এক্সেপ্ট করেছে`, d.title, d.id);
     if (isAsync(d) && s.opDone && !s.iDone && !s.over && !s.isVoid) fire(`${d.id}:op`, `${opp} শেষ করেছে, এবার তোমার পালা!`, d.title, d.id);
-    if (s.over){
+    if (s.over && banks[d.subj]){
       const w = winnerOf(d);
       fire(`${d.id}:res`, "রেজাল্ট এসেছে!", `${d.title}: ` + (w === "draw" ? "ড্র" : w === me.uid ? "তুমি জিতেছ 🏆" : `${opp} জিতেছে`), d.id);
     }
@@ -1366,6 +1388,7 @@ function openDuel(id){
 }
 function showDuelResult(d){
   d = duels[d.id] || d;
+  if (!banks[d.subj]){ loadBank(d.subj).then(() => showDuelResult(d)).catch(() => toast("প্রশ্ন লোড হয়নি")); return; }
   const s = st(d), opp = oppNameOf(d);
   const r = duelScores(d), iAmA = d.from === me.uid;
   const mine = iAmA ? r.A : r.B, hers = iAmA ? r.B : r.A;
@@ -1594,7 +1617,7 @@ async function boot(){
     $("#homeAlert").innerHTML = `<div class="blk panel" style="margin-top:16px"><b>প্রশ্ন লোড হয়নি 😕</b><p class="hint">data/bio.json ফাইলটা পাওয়া যায়নি। GitHub এ data ফোল্ডারের ভেতরে bio.json আছে কিনা দেখো, তারপর পেজ রিফ্রেশ করো।</p><button class="btn" onclick="location.reload()">আবার চেষ্টা করো</button></div>`;
     return;
   }
-  $("#srcNote").textContent = "প্রশ্নের উৎস: " + bank.source + " · " + bn(bank.q.length) + "টি প্রশ্ন";
+  srcNoteUpdate();
   if (bank.old) $("#homeAlert").innerHTML = `<div class="blk panel" style="margin-top:16px;border-color:var(--bad)"><b>প্রশ্নের ফাইলটা পুরনো</b><p class="hint" style="margin-bottom:0">GitHub এ data ফোল্ডারে নতুন bio.json আপলোড করো। না হলে সেভ, রিভিশন আর ডুয়েল ঠিকমতো কাজ করবে না।</p></div>`;
   $("#rvSubject").innerHTML = $("#fSubject").innerHTML;
   udLoadLocal();
