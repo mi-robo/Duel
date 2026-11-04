@@ -1,5 +1,5 @@
 // Robo Duel service worker: works offline for practice, always tries fresh code first.
-const CACHE = "robo-duel-v4";
+const CACHE = "robo-duel-v5";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./data/bio.json", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -13,12 +13,7 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   // Firebase live data must never be cached
   if (url.hostname.includes("firebasedatabase.app") || url.hostname.includes("firebaseio.com")) return;
-  // Question banks: cache first (big files, rarely change)
-  if (url.pathname.includes("/data/")) {
-    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => { const cp = res.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); return res; })));
-    return;
-  }
-  // Everything else: network first, fall back to cache when offline
+  // Everything (incl. question banks): network first so updates always arrive, fall back to cache when offline
   e.respondWith(fetch(e.request).then(res => {
     if (res.ok || res.type === "opaque") { const cp = res.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); }
     return res;

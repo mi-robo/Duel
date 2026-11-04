@@ -194,7 +194,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
       <button id="installBtn" class="ibtn hidden" onclick="doInstall()" aria-label="অ্যাপ ইনস্টল করো">⬇️</button>
       <button id="bellBtn" class="ibtn hidden" onclick="openInbox()" aria-label="নোটিফিকেশন">🔔<span id="bellCnt" class="cnt hidden"></span></button>
       <button id="themeBtn" class="ibtn" onclick="toggleTheme()" aria-label="থিম বদলাও">🌙</button>
-      <span id="meBadge" class="badge hidden"></span>
+      <button id="meBadge" class="badge hidden" onclick="openProfile()" aria-label="প্রোফাইল ও সিঙ্ক কোড" style="cursor:pointer;font:inherit;font-weight:700"></button>
     </div>
   </header>
 
@@ -206,6 +206,11 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
       <div class="field"><input id="nameIn" type="text" maxlength="20" placeholder="যেমন: Omi"></div>
       <button class="btn primary" onclick="saveName()">শুরু করি</button>
     </div>
+    <div class="blk panel">
+      <h3 style="margin-top:0">আগে থেকে অ্যাকাউন্ট আছে?</h3>
+      <p class="hint">অন্য ডিভাইসে নামের উপর চাপ দিলে সিঙ্ক কোড পাবে। সেটা এখানে দাও, সব প্র্যাকটিস আর ডুয়েল একই থাকবে।</p>
+      <div class="row"><input id="codeIn1" type="text" placeholder="যেমন: AB12CD34" autocapitalize="characters"><button class="btn" style="flex:0 0 auto" onclick="loginCode('codeIn1')">ঢুকো</button></div>
+    </div>
   </section>
 
   <!-- Home -->
@@ -214,7 +219,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
       <button class="tile t-practice" onclick="go('practice')"><span class="ic">📘</span><span><span class="tt">অনুশীলন</span><br><span class="ts" id="tsPractice">একা প্র্যাকটিস</span></span></button>
       <button class="tile t-duel" onclick="go('duels')"><span class="ic">⚔️</span><span><span class="tt">ডুয়েল</span><br><span class="ts" id="tsDuel">বন্ধুর সাথে লড়াই</span></span><span id="duelCnt" class="cnt hidden"></span></button>
       <button class="tile t-history" onclick="go('history')"><span class="ic">📊</span><span><span class="tt">ইতিহাস</span><br><span class="ts" id="tsHistory">রেকর্ড ও দুর্বল অধ্যায়</span></span></button>
-      <button class="tile t-rev" onclick="startRevision()"><span class="ic">🔁</span><span><span class="tt">ভুলের রিভিশন</span><br><span class="ts" id="tsRev">যেগুলো ভুল করেছ</span></span></button>
+      <button class="tile t-rev" onclick="go('revision')"><span class="ic">🔁</span><span><span class="tt">ভুলের রিভিশন</span><br><span class="ts" id="tsRev">যেগুলো ভুল করেছ</span></span></button>
     </div>
     <div id="homeAlert"></div>
   </section>
@@ -243,6 +248,32 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
       <div class="solo-stats"><span title="সঠিক">✅ <b id="soC">০</b></span><span title="ভুল">❌ <b id="soW">০</b></span><span title="টানা সঠিক">🔥 <b id="soS">০</b></span></div>
     </div>
     <div id="soloCard"></div>
+  </section>
+
+  <!-- Revision -->
+  <section id="s-revision" class="hidden">
+    <div class="backbar"><button class="backbtn" onclick="go('home')" aria-label="পেছনে">←</button><h2>ভুলের রিভিশন</h2></div>
+    <div class="blk panel">
+      <p style="margin-top:0">মোট <b id="rvTotal">০</b>টা ভুল প্রশ্ন জমা আছে। এখানে ঠিক করলে লিস্ট থেকে সরে যাবে।</p>
+      <span class="lbl">অধ্যায়</span>
+      <div id="rvChips" class="chips"></div>
+      <p class="hint">কোনো অধ্যায় না বাছলে সব থেকে আসবে।</p>
+      <div class="row">
+        <div class="field"><label for="rvSrc">উৎস</label>
+          <select id="rvSrc">
+            <option value="all">সব</option>
+            <option value="t:medical">মেডিকেল ও ডেন্টাল</option>
+            <option value="t:varsity">ভার্সিটি (সব)</option>
+            <option value="t:board">HSC বোর্ড</option>
+            <option value="t:book">পাঠ্যবই ও গাইডের প্রশ্ন</option>
+            <option value="s:DU">ঢাবি (DU)</option><option value="s:JU">জাবি (JU)</option><option value="s:RU">রাবি (RU)</option>
+            <option value="s:CU">চবি (CU)</option><option value="s:GST">গুচ্ছ (GST)</option><option value="s:DU7">ঢাবি ৭ কলেজ</option>
+          </select></div>
+        <div class="field"><label for="rvCount">কতগুলো?</label><input id="rvCount" type="number" min="1" max="200" value="20"></div>
+      </div>
+      <p class="hint" style="margin:0">পাওয়া যাচ্ছে: <b id="rvPoolN">০</b>টা · সময় নেই · উত্তর বদলানো যাবে · যেকোনো সময় বের হতে পারবে</p>
+    </div>
+    <button class="btn primary big-cta" onclick="startRevision()">রিভিশন শুরু</button>
   </section>
 
   <!-- Duels -->
@@ -290,12 +321,13 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
   <section id="s-exam" class="hidden">
     <div class="bar">
       <div class="t">
-        <span id="exTitle" style="font-weight:700"></span>
+        <span style="display:flex;align-items:center;gap:8px;min-width:0"><button class="backbtn" style="width:36px;height:36px;font-size:16px;flex:0 0 auto" onclick="confirmExit()" aria-label="বের হও">✕</button><span id="exTitle" style="font-weight:700"></span></span>
         <span id="timer" class="timer">--:--</span>
       </div>
       <div class="prog"><span>তুমি</span><div class="track"><i id="myTrack"></i></div><span id="myProg">0/0</span></div>
       <div id="herRow" class="prog hidden"><span id="herName">ও</span><div class="track her"><i id="herTrack"></i></div><span id="herProg">0/0</span></div>
     </div>
+    <p id="examRule" class="hint" style="font-weight:600;margin:0 0 12px"></p>
     <div id="qList"></div>
     <div class="sticky-bottom"><button class="btn gold" onclick="confirmSubmit()">জমা দাও</button></div>
   </section>
@@ -333,6 +365,9 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
               <option value="s:CU">চবি (CU)</option>
               <option value="s:GST">গুচ্ছ (GST)</option>
               <option value="s:DU7">ঢাবি ৭ কলেজ</option>
+            </optgroup>
+            <optgroup label="বই">
+              <option value="s:BOOK">মূল বইয়ের প্রশ্ন (NCTB)</option>
             </optgroup>
           </select>
         </div>
@@ -398,6 +433,7 @@ function fmtLeft(ms){
 const dateBn = t => new Date(t).toLocaleDateString("bn-BD", { day: "numeric", month: "short" }) + ", " + new Date(t).toLocaleTimeString("bn-BD", { hour: "numeric", minute: "2-digit" });
 let toastT = null;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.remove("hidden"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add("hidden"), 2600); }
+const RULE = "⚠️ একবার কোনো অপশন বাছলে আর বদলানো যাবে না (আসল পরীক্ষার OMR এর মতো)।";
 
 /* ============ STATE ============ */
 let me = LS.get("rd_me", null);
@@ -408,17 +444,65 @@ let db = null, srvOffset = 0, players = {}, duels = {}, duelsLoaded = false;
 let oppSel = null, createMode = "live";
 let resultBack = "home", resultReady = false;
 let launched = new Set(), waitingFor = null, sentWaiting = null, modalLocked = false;
+let UD = null;   // synced user data
 const now = () => Date.now() + srvOffset;
 
+/* ============ QUESTION IDS (stable across bank updates) ============ */
+function qIndex(subj, x){
+  const b = banks[subj]; if (!b) return -1;
+  if (typeof x === "number") return x < b.q.length ? x : -1;   // old duels stored positions
+  const i = b.idx.get(x); return i === undefined ? -1 : i;
+}
+const qId = (subj, i) => banks[subj].q[i][7];
+const toIdx = (subj, arr) => (arr || []).map(x => qIndex(subj, x));
+const toIds = (subj, arr) => arr.map(i => qId(subj, i));
+
+/* ============ SYNCED USER DATA ============ */
+function udBlank(){ return { upd: 0, seen: {}, wrong: {}, chstats: {}, psess: [] }; }
+function udLoadLocal(){
+  UD = LS.get("rd_ud_" + me.uid, null);
+  if (!UD){   // first run of this version: bring over old local data
+    UD = udBlank();
+    const s = "bio";
+    if (banks[s]){
+      const conv = a => (a || []).map(i => typeof i === "number" && banks[s].q[i] ? qId(s, i) : i).filter(x => typeof x === "string");
+      UD.seen[s] = conv(LS.get("rd_seen_"+s, []));
+      UD.wrong[s] = conv(LS.get("rd_wrong_"+s, []));
+      UD.chstats[s] = LS.get("rd_chstats_"+s, {});
+      UD.psess = LS.get("rd_psess", []).map(p => ({ t: p.t, type: /একটা একটা/.test(p.title) ? "solo" : p.title === "ভুলের রিভিশন" ? "rev" : "exam",
+        subj: p.subj, title: p.title, ids: conv(p.qids), ans: p.ans, neg: p.neg, used: p.used }));
+      if (UD.seen[s].length || UD.psess.length) UD.upd = 1;
+    }
+    LS.set("rd_ud_" + me.uid, UD);
+  }
+}
+let udT = null, udApplying = false;
+function udSave(){
+  UD.upd = Date.now();
+  LS.set("rd_ud_" + me.uid, UD);
+  clearTimeout(udT); udT = setTimeout(udPush, 1200);
+}
+function udPush(){ if (db && me) db.ref(`players/${me.uid}/ud`).set(JSON.stringify(UD)).catch(() => {}); }
+function udListen(){
+  db.ref(`players/${me.uid}/ud`).on("value", s => {
+    const v = s.val();
+    if (!v){ if (UD.upd) udPush(); return; }
+    let r; try { r = JSON.parse(v); } catch(e){ return; }
+    if (r.upd > UD.upd){ UD = Object.assign(udBlank(), r); LS.set("rd_ud_" + me.uid, UD); refreshScreen(); }
+    else if (r.upd < UD.upd) udPush();
+  });
+}
+const udArr = (k, s) => (UD[k][s] = UD[k][s] || []);
+
 /* ============ ROUTER ============ */
-const SCREENS = ["setup","home","practice","solo","duels","create","history","exam","result"];
+const SCREENS = ["setup","home","practice","solo","revision","duels","create","history","exam","result"];
 function go(s){ if (location.hash.slice(1) !== s) location.hash = s; else render(); }
 window.addEventListener("hashchange", render);
 function render(){
   let s = location.hash.slice(1) || "home";
   if (!me) s = "setup";
   else if (s === "setup") s = "home";
-  if (exam && !exam.done && s !== "exam"){ history.replaceState(null, "", "#exam"); s = "exam"; toast("পরীক্ষা চলছে! আগে জমা দাও"); }
+  if (exam && !exam.done && s !== "exam"){ history.replaceState(null, "", "#exam"); s = "exam"; toast("পরীক্ষা চলছে! জমা দাও বা ✕ চাপো"); }
   if (s === "exam" && !(exam && !exam.done)) s = "home";
   if (s === "result" && !resultReady) s = "home";
   if (s === "solo" && !solo) s = "practice";
@@ -432,32 +516,62 @@ function render(){
 function curScreen(){ return SCREENS.find(x => !$("#s-"+x).classList.contains("hidden")); }
 function refreshScreen(s = curScreen()){
   $("#meBadge").textContent = me ? me.name : ""; $("#meBadge").classList.toggle("hidden", !me);
+  if (!UD && s !== "setup") return;
   if (s === "home") renderHome();
   if (s === "practice"){ renderPracticeList(); if (bank) updatePool(); }
+  if (s === "revision") renderRevision();
   if (s === "duels") renderDuels();
   if (s === "create"){ renderPlayers(); if (bank) updatePool(); }
   if (s === "history") renderHistory();
   updateBadges();
 }
 
-/* ============ SETUP ============ */
+/* ============ ACCOUNT ============ */
 function saveName(){
   const n = $("#nameIn").value.trim();
-  if (!n) return;
-  me = { uid: (me && me.uid) || ("u" + Math.random().toString(36).slice(2,10)), name: n };
+  if (!n) return toast("নাম লেখো");
+  me = { uid: "u" + Math.random().toString(36).slice(2,10), name: n };
   LS.set("rd_me", me);
   boot().then(() => go("home"));
+}
+const codeOf = uid => uid.slice(1).toUpperCase();
+async function loginCode(inputId){
+  const code = $("#"+inputId).value.trim().toLowerCase().replace(/\s/g, "");
+  if (!code) return toast("কোড লেখো");
+  const uid = "u" + code;
+  if (me && me.uid === uid) return toast("এটা তো এই অ্যাকাউন্টই");
+  const snap = await db.ref("players/" + uid + "/name").once("value");
+  if (!snap.val()) return toast("এই কোডের কোনো অ্যাকাউন্ট পাওয়া যায়নি");
+  if (me) await db.ref("players/" + me.uid).remove();   // remove this device's duplicate
+  me = { uid, name: snap.val() };
+  LS.set("rd_me", me);
+  location.hash = "home"; location.reload();
+}
+function openProfile(){
+  modal(`<h3 style="margin-top:0">${esc(me.name)}</h3>
+    <p class="hint" style="margin-bottom:4px">তোমার সিঙ্ক কোড (অন্য ডিভাইসে এটা দিয়ে ঢুকলে সব একই থাকবে):</p>
+    <div class="crown" style="font-size:22px;user-select:all">${esc(codeOf(me.uid))}</div>
+    <button class="btn" style="width:100%;margin-bottom:16px" onclick="navigator.clipboard.writeText('${codeOf(me.uid)}').then(()=>toast('কপি হয়েছে'))">কোড কপি করো</button>
+    <span class="lbl">অন্য অ্যাকাউন্টের কোড দিয়ে এই ডিভাইসে ঢুকো</span>
+    <div class="row"><input id="codeIn2" type="text" placeholder="যেমন: AB12CD34" autocapitalize="characters"><button class="btn primary" style="flex:0 0 auto" onclick="loginCode('codeIn2')">ঢুকো</button></div>
+    <p class="hint">এই ডিভাইসের এখনকার প্রোফাইলটা মুছে যাবে।</p>
+    <button class="btn ghost" style="width:100%" onclick="closeModal()">বন্ধ করো</button>`);
 }
 
 /* ============ DATA & FILTERS ============ */
 async function loadBank(id){
   if (banks[id]) return banks[id];
   const s = SUBJECTS.find(x => x.id === id);
-  const d = await (await fetch(s.file)).json();
+  const d = await (await fetch(s.file, { cache: "no-cache" })).json();
+  d.idx = new Map(d.q.map((q,i) => [q[7], i]));
   banks[id] = d; return d;
 }
-const secName = (b, i) => b.secs[i];
 function tgtOf(b, sec){ const n = b.secs[sec]; return n === "MEDICAL" ? "medical" : n === "BOARD" ? "board" : (n === "BOOK" || n === "GUIDE") ? "book" : "varsity"; }
+function srcMatch(b, q, src){
+  if (src.startsWith("t:")) return tgtOf(b, q[5]) === src.slice(2);
+  if (src.startsWith("s:")) return q[5] === b.secs.indexOf(src.slice(2));
+  return true;
+}
 function renderChips(){
   const counts = {};
   bank.q.forEach(q => counts[q[0]] = (counts[q[0]]||0) + 1);
@@ -485,8 +599,7 @@ function pool(){
   bank.q.forEach((q,i) => {
     const ch = bank.chapters[q[0]];
     if (pickedCh.size ? !pickedCh.has(q[0]) : (paper && ch.p !== paper)) return;
-    if (src.startsWith("t:") && tgtOf(bank, q[5]) !== src.slice(2)) return;
-    if (src.startsWith("s:") && q[5] !== bank.secs.indexOf(src.slice(2))) return;
+    if (!srcMatch(bank, q, src)) return;
     ids.push(i);
   });
   return ids;
@@ -494,8 +607,9 @@ function pool(){
 function updatePool(){ $("#poolN").textContent = bn(pool().length); }
 const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 function pickQuestions(n){
-  const all = pool(), seen = new Set(LS.get("rd_seen_"+subjId, []));
-  const list = $("#fFresh").checked ? shuffle(all.filter(i => !seen.has(i))).concat(shuffle(all.filter(i => seen.has(i)))) : shuffle(all);
+  const all = pool(), seen = new Set(udArr("seen", subjId));
+  const isSeen = i => seen.has(qId(subjId, i));
+  const list = $("#fFresh").checked ? shuffle(all.filter(i => !isSeen(i))).concat(shuffle(all.filter(isSeen))) : shuffle(all);
   return list.slice(0, n);
 }
 function settings(){
@@ -503,16 +617,13 @@ function settings(){
   mins = mins === "custom" ? (+$("#fTimeCustom").value || 10) : +mins;
   return { count: Math.max(5, Math.min(200, +$("#fCount").value || 25)), mins, neg: $("#fNeg").checked };
 }
-function chLabels(){
-  if (pickedCh.size) return [...pickedCh].sort((a,b) => a-b).map(i => bank.chapters[i].n);
-  return [];
-}
+function chLabels(){ return pickedCh.size ? [...pickedCh].sort((a,b) => a-b).map(i => bank.chapters[i].n) : []; }
 function chText(chs, pap){ return chs && chs.length ? chs.join(", ") : (pap === 1 ? "১ম পত্রের সব অধ্যায়" : pap === 2 ? "২য় পত্রের সব অধ্যায়" : "সব অধ্যায়"); }
 function srcLabel(){ const o = $("#fSrc").selectedOptions[0]; return o ? o.textContent : "সব প্রশ্ন"; }
-function titleFor(qids){
-  const set = new Set(qids.map(i => bank.q[i][0]));
-  if (set.size === 1) return bank.chapters[[...set][0]].n;
-  return bank.subject + " (" + bn(set.size) + "টি অধ্যায়)";
+function titleFor(b, idxs){
+  const set = new Set(idxs.filter(i => i >= 0).map(i => b.q[i][0]));
+  if (set.size === 1) return b.chapters[[...set][0]].n;
+  return b.subject + " (" + bn(set.size) + "টি অধ্যায়)";
 }
 
 /* ============ PRACTICE ============ */
@@ -528,15 +639,32 @@ function startPractice(){
   if (practiceMode === "solo") return startSolo();
   const s = settings(), qids = pickQuestions(s.count);
   if (!qids.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
-  runExam({ subj: subjId, qids, neg: s.neg, title: titleFor(qids), startAt: Date.now(), endAt: s.mins ? Date.now() + s.mins*60000 : 0 });
+  const title = titleFor(bank, qids);
+  modal(`<h3 style="margin-top:0">শুরু করবে?</h3>
+    <div class="info"><b>${esc(title)}</b><br><b>${bn(qids.length)}</b> প্রশ্ন · ${s.mins ? `<b>${bn(s.mins)}</b> মিনিট` : "সময় ছাড়া"} · নেগেটিভ মার্কিং ${s.neg ? "<b>আছে</b>" : "নেই"}</div>
+    <p style="font-weight:600">${RULE}</p>
+    <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn primary" id="goPractice">শুরু!</button></div>`);
+  $("#goPractice").onclick = () => {
+    closeModal();
+    runExam({ kind: "exam", subj: subjId, qids, neg: s.neg, title, startAt: Date.now(), endAt: s.mins ? Date.now() + s.mins*60000 : 0 });
+  };
 }
-async function startRevision(){
-  bank = await loadBank(subjId);
-  const wrong = LS.get("rd_wrong_"+subjId, []);
-  if (!wrong.length) return toast("এখনো কোনো ভুল জমা হয়নি 👏");
-  const qids = shuffle([...wrong]).slice(0, 30);
-  runExam({ subj: subjId, qids, neg: false, title: "ভুলের রিভিশন", startAt: Date.now(), endAt: 0 });
+function savePractice(p){
+  UD.psess.unshift(Object.assign({ t: Date.now() }, p));
+  UD.psess = UD.psess.slice(0, 40);
+  udSave();
 }
+function renderPracticeList(){
+  const list = UD.psess;
+  const tag = { solo: " · একটা একটা", rev: " · রিভিশন" };
+  $("#practiceList").innerHTML = list.length ? list.map((p,i) => {
+    const b = banks[p.subj] || bank, idx = toIdx(p.subj, p.ids), r = scoreWith(b, p.ans, idx, p.neg);
+    return `<div class="blk card clickrow" onclick="openPractice(${i})"><div class="top"><span class="nm">${esc(p.title.replace(" · একটা একটা",""))}<span class="hint">${tag[p.type] || ""}</span></span><b>${bn(r.s)}/${bn(r.c + r.w + (p.type === "exam" ? r.skip : 0))}</b></div>
+      <div class="info">${dateBn(p.t)} · ${bn(r.w)} ভুল${p.type === "exam" ? ` · ${bn(r.skip)} বাদ` : ""}</div></div>`;
+  }).join("") : '<p class="hint">এখনো কোনো অনুশীলন নেই।</p>';
+}
+function openPractice(i){ const p = UD.psess[i]; if (p) showPracticeResult(Object.assign({}, p, { qids: toIdx(p.subj, p.ids) }), false, "practice"); }
+
 /* ---- one by one ---- */
 function startSolo(){
   const list = pickQuestions(pool().length);
@@ -552,9 +680,16 @@ function renderSolo(){
     <h3>${esc(q[1])}</h3>
     <div class="opts">${q[2].map((o,j) => `<button class="opt" data-j="${j}" onclick="soloAnswer(${j})"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
     <div id="soloAfter"></div>
-    <div class="solo-nav"><button class="btn" id="soloSkip" onclick="soloSkip()">এড়িয়ে যাও</button></div>
-  </article>`;
+  </article>
+  <div class="solo-nav" id="soloNav"><button class="btn ghost" onclick="soloReveal()">👁 উত্তর দেখাও</button><button class="btn" onclick="soloNext()">এড়িয়ে যাও →</button></div>`;
   updateSoloStats();
+}
+function soloShow(q, pickedWrong){
+  $$("#soloCard .opt").forEach(btn => {
+    const k = +btn.dataset.j; btn.disabled = true;
+    if (k === q[3]) btn.classList.add("right"); else if (k === pickedWrong) btn.classList.add("wrong");
+  });
+  $("#soloNav").innerHTML = `<button class="btn primary" style="flex:1" onclick="soloNext()">পরের প্রশ্ন →</button>`;
 }
 function soloAnswer(j){
   if (solo.picked !== null) return;
@@ -562,24 +697,19 @@ function soloAnswer(j){
   const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi], ok = j === q[3];
   solo.ans[solo.i] = j;
   if (ok){ solo.c++; solo.streak++; solo.best = Math.max(solo.best, solo.streak); } else { solo.w++; solo.streak = 0; }
-  $$("#soloCard .opt").forEach(btn => {
-    const k = +btn.dataset.j; btn.disabled = true;
-    if (k === q[3]) btn.classList.add("right"); else if (k === j) btn.classList.add("wrong");
-  });
+  soloShow(q, j);
   $("#soloAfter").innerHTML = `<p class="verdict ${ok ? "ok" : "no"}">${ok ? "সঠিক! ✅" : `ভুল ❌ সঠিক উত্তর: ${L[q[3]]}`}</p>` + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
-  $("#soloSkip").outerHTML = `<button class="btn primary" onclick="soloNext()">পরের প্রশ্ন →</button>`;
-  recordLocal({ subj: solo.subj, qids: [qi], ans: { 0: j } });
+  markSeen(solo.subj, [qi]);
   if (navigator.vibrate && !ok) navigator.vibrate(80);
   updateSoloStats();
 }
-function soloSkip(){
+function soloReveal(){
   if (solo.picked !== null) return;
   solo.picked = -1;
-  const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi];
-  $$("#soloCard .opt").forEach(btn => { btn.disabled = true; if (+btn.dataset.j === q[3]) btn.classList.add("right"); });
-  $("#soloAfter").innerHTML = `<p class="verdict">এড়িয়ে গেছ। সঠিক উত্তর: ${L[q[3]]}</p>` + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
-  $("#soloSkip").outerHTML = `<button class="btn primary" onclick="soloNext()">পরের প্রশ্ন →</button>`;
-  recordLocal({ subj: solo.subj, qids: [qi], ans: {} });
+  const q = banks[solo.subj].q[solo.list[solo.i]];
+  soloShow(q, -1);
+  $("#soloAfter").innerHTML = `<p class="verdict">সঠিক উত্তর: ${L[q[3]]}</p>` + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
+  markSeen(solo.subj, [solo.list[solo.i]]);
 }
 function updateSoloStats(){ $("#soC").textContent = bn(solo.c); $("#soW").textContent = bn(solo.w); $("#soS").textContent = bn(solo.streak); }
 function soloNext(){
@@ -594,28 +724,36 @@ function endSolo(){
   if (!idx.length) return go("practice");
   const qids = idx.map(i => s.list[i]), ans = {};
   idx.forEach((i,k) => ans[k] = s.ans[i]);
-  bank = banks[s.subj];
-  const title = titleFor(qids) + " · একটা একটা";
-  const sess = { title, subj: s.subj, qids, ans, neg: false, used: Date.now() - s.t };
-  const list = LS.get("rd_psess", []); list.unshift(Object.assign({ t: Date.now() }, sess)); LS.set("rd_psess", list.slice(0, 40));
-  showPracticeResult(sess, false, "practice");
+  const b = banks[s.subj], title = titleFor(b, qids);
+  savePractice({ type: "solo", title, subj: s.subj, ids: toIds(s.subj, qids), ans, neg: false, used: Date.now() - s.t });
+  showPracticeResult({ title, subj: s.subj, qids, ans, neg: false, used: Date.now() - s.t, type: "solo" }, false, "practice");
   if (s.best >= 3) toast(`সর্বোচ্চ টানা সঠিক: ${bn(s.best)} 🔥`);
 }
 
-function savePractice(ex){
-  const list = LS.get("rd_psess", []);
-  list.unshift({ t: Date.now(), subj: ex.subj, title: ex.title, qids: ex.qids, ans: ex.ans, neg: ex.neg, used: ex.usedMs });
-  LS.set("rd_psess", list.slice(0, 40));
+/* ---- mistake revision ---- */
+let rvCh = new Set();
+function wrongIdx(){ return toIdx(subjId, udArr("wrong", subjId)).filter(i => i >= 0); }
+function rvPool(){
+  const src = $("#rvSrc").value;
+  return wrongIdx().filter(i => { const q = bank.q[i]; return (!rvCh.size || rvCh.has(q[0])) && srcMatch(bank, q, src); });
 }
-function renderPracticeList(){
-  const list = LS.get("rd_psess", []);
-  $("#practiceList").innerHTML = list.length ? list.map((p,i) => {
-    const r = scoreWith(banks[p.subj] || bank, p.ans, p.qids, p.neg);
-    return `<div class="blk card clickrow" onclick="openPractice(${i})"><div class="top"><span class="nm">${esc(p.title)}</span><b>${bn(r.s)}/${bn(p.qids.length)}</b></div>
-      <div class="info">${dateBn(p.t)} · ${bn(r.w)} ভুল · ${bn(r.skip)} বাদ</div></div>`;
-  }).join("") : '<p class="hint">এখনো কোনো অনুশীলন নেই।</p>';
+function renderRevision(){
+  const all = wrongIdx(), counts = {};
+  all.forEach(i => { const c = bank.q[i][0]; counts[c] = (counts[c]||0) + 1; });
+  [...rvCh].forEach(c => { if (!counts[c]) rvCh.delete(c); });
+  $("#rvTotal").textContent = bn(all.length);
+  $("#rvChips").innerHTML = Object.keys(counts).length ? Object.keys(counts).map(Number).sort((a,b) => a-b).map(c =>
+    `<button type="button" class="chip" data-c="${c}" aria-pressed="${rvCh.has(c)}">${esc(bank.chapters[c].n)} <small>${bn(counts[c])}</small></button>`).join("")
+    : '<p class="hint">এখনো কোনো ভুল জমা হয়নি 👏 পরীক্ষা বা ডুয়েলে যেগুলো ভুল করবে, এখানে আসবে।</p>';
+  $$("#rvChips .chip").forEach(b => b.onclick = () => { const c = +b.dataset.c; rvCh.has(c) ? rvCh.delete(c) : rvCh.add(c); b.setAttribute("aria-pressed", rvCh.has(c)); $("#rvPoolN").textContent = bn(rvPool().length); });
+  $("#rvPoolN").textContent = bn(rvPool().length);
 }
-function openPractice(i){ const p = LS.get("rd_psess", [])[i]; if (p) showPracticeResult(p, false, "practice"); }
+$("#rvSrc").onchange = () => $("#rvPoolN").textContent = bn(rvPool().length);
+function startRevision(){
+  const p = shuffle(rvPool()).slice(0, Math.max(1, +$("#rvCount").value || 20));
+  if (!rvPool().length) return toast("এই ফিল্টারে কোনো ভুল প্রশ্ন নেই");
+  runExam({ kind: "rev", changeable: true, subj: subjId, qids: p, neg: false, title: "ভুলের রিভিশন", startAt: Date.now(), endAt: 0 });
+}
 
 /* ============ EXAM ============ */
 function runExam(ex){
@@ -623,9 +761,11 @@ function runExam(ex){
   exam.startedAt = ex.startAt || Date.now();
   $("#exTitle").textContent = exam.title;
   $("#herRow").classList.toggle("hidden", !exam.live);
+  $("#examRule").textContent = exam.changeable ? "এখানে উত্তর বদলানো যাবে।" : RULE;
   if (exam.live){ $("#herName").textContent = exam.oppName; $("#herProg").textContent = "০/" + bn(exam.qids.length); $("#herTrack").style.width = "0"; }
   const b = banks[exam.subj];
   $("#qList").innerHTML = exam.qids.map((qi, k) => {
+    if (qi < 0) return `<article class="blk q" id="q${k}"><p class="hint">${bn(k+1)}. এই প্রশ্নটা আর পাওয়া যাচ্ছে না।</p></article>`;
     const q = b.q[qi];
     return `<article class="blk q" id="q${k}">
       <div class="meta"><span>${bn(k+1)}/${bn(exam.qids.length)}</span><span>${esc(q[4]||"")}</span></div>
@@ -641,14 +781,16 @@ function runExam(ex){
 }
 function lockAnswer(k, j){
   exam.ans[k] = j;
-  $$(`#q${k} .opt`).forEach(b => { b.disabled = true; if (+b.dataset.j === j) b.classList.add("sel"); });
+  $$(`#q${k} .opt`).forEach(b => { b.classList.toggle("sel", +b.dataset.j === j); if (!exam.changeable) b.disabled = true; });
 }
 function answer(k, j){
-  if (exam.done || exam.ans[k] !== undefined) return;   // OMR style: one shot
+  if (exam.done) return;
+  const first = exam.ans[k] === undefined;
+  if (!first && !exam.changeable) return;   // OMR style: one shot
   lockAnswer(k, j); updateProg();
   if (exam.duelId && db) db.ref(`duels/${exam.duelId}/p/${me.uid}/a/${k}`).set(j);
   const nx = $(`#q${k+1}`);
-  if (nx) setTimeout(() => nx.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }), 120);
+  if (first && nx) setTimeout(() => nx.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }), 120);
 }
 function updateProg(){
   const n = Object.keys(exam.ans).length, t = exam.qids.length;
@@ -669,37 +811,60 @@ function confirmSubmit(){
   modal(`<h3 style="margin-top:0">জমা দেবে?</h3><p>${left ? bn(left)+"টি প্রশ্ন বাকি আছে।" : "সব উত্তর দেওয়া শেষ।"}</p>
     <div class="row"><button class="btn" onclick="closeModal()">না, আরো দেখি</button><button class="btn gold" onclick="closeModal();submit(false)">হ্যাঁ, জমা</button></div>`);
 }
-function scoreWith(b, ans, qids, neg){
-  let c=0, w=0;
-  if (b) qids.forEach((qi,k) => { if (ans[k] === undefined || ans[k] === null) return; ans[k] === b.q[qi][3] ? c++ : w++; });
-  return { c, w, s: Math.round((c - (neg ? w*0.25 : 0))*100)/100, skip: qids.length - c - w };
+function confirmExit(){
+  if (exam.duelId){
+    modal(`<h3 style="margin-top:0">বের হবে?</h3><p>ডুয়েলের ঘড়ি চলতেই থাকবে। ডুয়েল পেজ থেকে আবার ফিরে আসতে পারবে, দেওয়া উত্তরগুলো থাকবে।</p>
+      <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();leaveExam('duels')">বের হও</button></div>`);
+  } else {
+    modal(`<h3 style="margin-top:0">বের হবে?</h3><p>${exam.kind === "rev" ? "এই রিভিশনের উত্তরগুলো সেভ হবে না।" : "এই পরীক্ষা বাতিল হবে, কিছু সেভ হবে না।"}</p>
+      <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();leaveExam('${exam.kind === "rev" ? "revision" : "practice"}')">বের হও</button></div>`);
+  }
 }
-function recordLocal(ex){
-  const b = banks[ex.subj];
-  const seen = new Set(LS.get("rd_seen_"+ex.subj, []));
-  const wrong = new Set(LS.get("rd_wrong_"+ex.subj, []));
-  const st = LS.get("rd_chstats_"+ex.subj, {});
+function leaveExam(to){ clearInterval(timerInt); exam = null; go(to); }
+function scoreWith(b, ans, idx, neg){
+  let c=0, w=0;
+  if (b) idx.forEach((qi,k) => { if (qi < 0 || ans[k] === undefined || ans[k] === null) return; ans[k] === b.q[qi][3] ? c++ : w++; });
+  return { c, w, s: Math.round((c - (neg ? w*0.25 : 0))*100)/100, skip: idx.length - c - w };
+}
+function markSeen(subj, idx){
+  const seen = new Set(udArr("seen", subj));
+  idx.forEach(i => { if (i >= 0) seen.add(qId(subj, i)); });
+  UD.seen[subj] = [...seen]; udSave();
+}
+/* stats: exams and duels only. wrongMode: "full" adds and removes, "fix" only removes, "none" leaves it */
+function recordLocal(ex, stats, wrongMode){
+  const b = banks[ex.subj], s = ex.subj;
+  const seen = new Set(udArr("seen", s)), wrong = new Set(udArr("wrong", s));
+  const st_ = UD.chstats[s] = UD.chstats[s] || {};
   ex.qids.forEach((qi,k) => {
-    seen.add(qi);
+    if (qi < 0) return;
+    const id = qId(s, qi); seen.add(id);
     if (ex.ans[k] === undefined) return;
     const ok = ex.ans[k] === b.q[qi][3];
-    const ch = b.q[qi][0]; st[ch] = st[ch] || [0,0];
-    st[ch][0]++; if (ok) st[ch][1]++;
-    ok ? wrong.delete(qi) : wrong.add(qi);
+    if (stats){ const ch = b.q[qi][0]; st_[ch] = st_[ch] || [0,0]; st_[ch][0]++; if (ok) st_[ch][1]++; }
+    if (wrongMode === "full") ok ? wrong.delete(id) : wrong.add(id);
+    if (wrongMode === "fix" && ok) wrong.delete(id);
   });
-  LS.set("rd_seen_"+ex.subj, [...seen]); LS.set("rd_wrong_"+ex.subj, [...wrong]); LS.set("rd_chstats_"+ex.subj, st);
+  UD.seen[s] = [...seen]; UD.wrong[s] = [...wrong]; udSave();
 }
 async function submit(timeUp){
   if (!exam || exam.done) return;
   exam.done = true; clearInterval(timerInt);
   const t = exam.duelId ? now() : Date.now();
   exam.usedMs = exam.endAt ? Math.min(t - exam.startedAt, exam.endAt - exam.startedAt) : t - exam.startedAt;
-  recordLocal(exam);
   if (!exam.duelId){
-    savePractice(exam);
-    showPracticeResult({ title: exam.title, subj: exam.subj, qids: exam.qids, ans: exam.ans, neg: exam.neg, used: exam.usedMs }, timeUp, "practice");
+    const rev = exam.kind === "rev";
+    if (rev){
+      const before = new Set(udArr("wrong", exam.subj));
+      recordLocal(exam, false, "fix");
+      exam.fixed = before.size - udArr("wrong", exam.subj).length;
+    } else recordLocal(exam, true, "full");
+    const p = { type: exam.kind, title: exam.title, subj: exam.subj, ids: toIds(exam.subj, exam.qids), ans: exam.ans, neg: exam.neg, used: exam.usedMs };
+    savePractice(p);
+    showPracticeResult(Object.assign({}, p, { qids: exam.qids, fixed: exam.fixed }), timeUp, rev ? "revision" : "practice");
     return;
   }
+  recordLocal(exam, true, "full");
   const id = exam.duelId, live = exam.live;
   await db.ref(`duels/${id}/p/${me.uid}`).update({ done: true, used: Math.max(0, exam.usedMs) });
   const d = duels[id];
@@ -707,9 +872,7 @@ async function submit(timeUp){
   if (live){
     waitingFor = id;
     modal(`<h3 style="margin-top:0">জমা হয়ে গেছে ✅</h3><p>${esc(exam.oppName)} শেষ করার অপেক্ষা...</p><p class="hint">সময় শেষ হলে আপনা আপনি রেজাল্ট আসবে।</p>`);
-  } else {
-    showDuelResult(d || { id });
-  }
+  } else showDuelResult(d || { id });
 }
 
 /* ============ RESULTS ============ */
@@ -722,10 +885,12 @@ function openResult(back){
 }
 function showPracticeResult(p, timeUp, back){
   const b = banks[p.subj] || bank, r = scoreWith(b, p.ans, p.qids, p.neg);
+  const solo_ = p.type === "solo";
   $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
     ${timeUp ? '<p class="hint">সময় শেষ!</p>' : ""}<p style="margin:0 0 8px;font-weight:700">${esc(p.title)}</p>
-    <div class="crown">${bn(r.s)} / ${bn(p.qids.length)}</div>
-    <div class="stats"><div><b>${bn(r.c)}</b>সঠিক</div><div><b>${bn(r.w)}</b>ভুল</div><div><b>${bn(r.skip)}</b>বাদ</div></div>
+    <div class="crown">${bn(r.s)} / ${bn(solo_ ? r.c + r.w : p.qids.length)}</div>
+    <div class="stats"><div><b>${bn(r.c)}</b>সঠিক</div><div><b>${bn(r.w)}</b>ভুল</div><div><b>${bn(solo_ ? 0 : r.skip)}</b>বাদ</div></div>
+    ${p.fixed ? `<p style="font-weight:700;color:var(--ok)">${bn(p.fixed)}টা ভুল শুধরে নিয়েছ! রিভিশন লিস্ট থেকে সরানো হলো ✅</p>` : ""}
     ${p.used ? `<p class="hint">সময় লেগেছে ${fmt(Math.round(p.used/1000))}</p>` : ""}</div>`;
   $("#rvDiff").classList.add("hidden");
   lastReview = { subj: p.subj, qids: p.qids, mine: p.ans, hers: null };
@@ -734,6 +899,7 @@ function showPracticeResult(p, timeUp, back){
 function renderReview(){
   const { subj, qids, mine, hers, herName } = lastReview, b = banks[subj] || bank;
   $("#review").innerHTML = qids.map((qi,k) => {
+    if (qi < 0) return "";
     const q = b.q[qi], a = q[3], m = mine[k], h = hers ? hers[k] : undefined;
     if (rvFilter === "wrong" && m === a) return "";
     if (rvFilter === "diff" && m === h) return "";
@@ -756,6 +922,7 @@ const oppNameOf = d => d.from === me.uid ? d.toName : d.fromName;
 const oppIdOf = d => d.from === me.uid ? d.to : d.from;
 const isAsync = d => d.mode === "async";
 function toAns(a){ const o = {}; if (a) Object.entries(a).forEach(([k,v]) => o[+k] = v); return o; }
+const dIdx = d => toIdx(d.subj, d.qids);
 function st(d){
   const live = !isAsync(d), dur = d.mins*60000, T = now();
   const myP = (d.p && d.p[me.uid]) || {}, opP = (d.p && d.p[oppIdOf(d)]) || {};
@@ -783,10 +950,10 @@ function st(d){
   return { live, myP, opP, myEnd, iDone, opDone, isVoid, over, canPlay, incoming, deadlinePassed, myExpired };
 }
 function duelScores(d){
-  const b = banks[d.subj] || bank;
+  const b = banks[d.subj] || bank, idx = dIdx(d);
   const A = toAns(d.p && d.p[d.from] && d.p[d.from].a), B = toAns(d.p && d.p[d.to] && d.p[d.to].a);
   const pa = (d.p && d.p[d.from]) || {}, pb = (d.p && d.p[d.to]) || {}, full = d.mins*60000;
-  return { A, B, sa: scoreWith(b, A, d.qids, d.neg), sb: scoreWith(b, B, d.qids, d.neg), ua: pa.used || full, ub: pb.used || full };
+  return { A, B, sa: scoreWith(b, A, idx, d.neg), sb: scoreWith(b, B, idx, d.neg), ua: pa.used || full, ub: pb.used || full };
 }
 function winnerOf(d){
   const r = duelScores(d);
@@ -797,15 +964,22 @@ function winnerOf(d){
 const myDuels = () => Object.values(duels).sort((a,b) => b.created - a.created);
 
 /* ============ FIREBASE ============ */
-function initFb(){
+function initFbApp(){
   if (db) return;
-  firebase.initializeApp(FIREBASE_CONFIG);
-  db = firebase.database();
-  db.ref(".info/serverTimeOffset").on("value", s => srvOffset = s.val() || 0);
+  try { firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database();
+        db.ref(".info/serverTimeOffset").on("value", s => srvOffset = s.val() || 0); } catch(e){ console.error(e); }
+}
+function initFb(){
+  if (!db) return;
   const pRef = db.ref("players/" + me.uid);
-  const hb = () => pRef.set({ name: me.name, seen: firebase.database.ServerValue.TIMESTAMP });
+  const hb = () => pRef.update({ name: me.name, seen: firebase.database.ServerValue.TIMESTAMP });
   hb(); setInterval(hb, 30000);
-  db.ref("players").on("value", s => { players = s.val() || {}; if (curScreen() === "create") renderPlayers(); });
+  db.ref("players").on("value", s => {
+    players = {};
+    s.forEach(c => { const v = c.val() || {}; players[c.key] = { name: v.name, seen: v.seen }; });
+    if (curScreen() === "create") renderPlayers();
+  });
+  udListen();
   db.ref("duels").limitToLast(300).on("value", s => {
     const all = {};
     s.forEach(c => { const v = c.val(); if (v && (v.from === me.uid || v.to === me.uid)){ v.id = c.key; all[c.key] = v; } });
@@ -820,29 +994,26 @@ function initFb(){
 
 /* Runs on every data change and every 2 s: starts live duels, finishes them, fires notifications */
 function processDuels(first){
-  if (!me) return;
+  if (!me || !UD) return;
   const evSeen = new Set(LS.get("rd_ev", [])), freshStore = !LS.get("rd_ev", null);
   const fire = (key, title, body, id, popup) => {
     if (evSeen.has(key)) return;
     evSeen.add(key);
-    if (freshStore && !popup) return;   // very first run: don't spam old events
+    if (freshStore && !popup) return;
     ping(title, body, id);
     if (popup) popup();
   };
   for (const d of myDuels()){
     const s = st(d), opp = oppNameOf(d);
     const recent = Date.now() - d.created < 48*3600000;
-    // housekeeping
     if (s.myExpired && !s.myP.done && !(exam && exam.duelId === d.id && !exam.done))
       db.ref(`duels/${d.id}/p/${me.uid}`).update({ done: true, used: d.mins*60000 });
     if (s.over && d.status !== "done") db.ref(`duels/${d.id}`).update({ status: "done" });
-    // live: both start together right after accepting
     if (s.live && d.status === "live" && !s.iDone && now() < d.startAt + 10000 && !launched.has(d.id) && !(exam && !exam.done)){
       launched.add(d.id);
-      if (sentWaiting === d.id){ sentWaiting = null; }
-      startDuel(d.id, true);
+      if (sentWaiting === d.id) sentWaiting = null;
+      startDuel(d.id);
     }
-    // in exam
     if (exam && exam.duelId === d.id){
       if (exam.live){
         const n = s.opP.a ? Object.keys(s.opP.a).length : 0;
@@ -852,7 +1023,6 @@ function processDuels(first){
       if (s.over && !exam.done) submit(true);
     }
     if (s.over && waitingFor === d.id){ waitingFor = null; closeModal(); showDuelResult(d); }
-    // notifications
     if (!recent) continue;
     if (s.incoming) fire(`${d.id}:in`, `⚔️ ${d.fromName} তোমাকে চ্যালেঞ্জ করেছে!`, `${d.title} · ${d.qids.length} প্রশ্ন · ${d.mins} মিনিট`, d.id,
       () => { if (!(exam && !exam.done)) challengePopup(d.id); });
@@ -875,16 +1045,17 @@ function resumeCheck(){
   if (!d) return;
   modal(`<h3 style="margin-top:0">⚔️ তোমার একটা ডুয়েল চলছে!</h3><p><b>${esc(d.title)}</b> vs ${esc(oppNameOf(d))}</p>
     <p class="hint">বাকি সময়: ${fmtLeft(st(d).myEnd - now())}। ঘড়ি থেমে নেই!</p>
-    <div class="row"><button class="btn" onclick="closeModal()">পরে</button><button class="btn pink" onclick="closeModal();startDuel('${d.id}',true)">ফিরে যাও</button></div>`);
+    <div class="row"><button class="btn" onclick="closeModal()">পরে</button><button class="btn pink" onclick="closeModal();startDuel('${d.id}')">ফিরে যাও</button></div>`);
 }
 
 /* ============ DUEL ACTIONS ============ */
 function renderPlayers(){
-  const list = Object.entries(players).filter(([u]) => u !== me.uid);
+  const cutoff = now() - 21*86400000;   // hide profiles unused for 3 weeks
+  const list = Object.entries(players).filter(([u,p]) => u !== me.uid && p.name && (p.seen||0) > cutoff);
   if (!list.length){ $("#plist").innerHTML = '<p class="hint">আর কেউ এখনো জয়েন করেনি। তোমার বন্ধুকে লিংক পাঠাও।</p>'; $("#sendBtn").disabled = true; return; }
   $("#plist").innerHTML = list.map(([u,p]) => {
     const on = now() - (p.seen||0) < 70000;
-    return `<button class="pl" data-u="${u}" aria-pressed="${oppSel===u}"><span><span class="dot ${on?"on":""}"></span>${esc(p.name)}</span><span class="hint">${on?"অনলাইন":"অফলাইন"}</span></button>`;
+    return `<button class="pl" data-u="${u}" aria-pressed="${oppSel===u}"><span><span class="dot ${on?"on":""}"></span>${esc(p.name)} <span class="hint">#${esc(codeOf(u).slice(0,3))}</span></span><span class="hint">${on?"অনলাইন":"অফলাইন"}</span></button>`;
   }).join("");
   $$("#plist .pl").forEach(b => b.onclick = () => { oppSel = b.dataset.u; renderPlayers(); });
   $("#sendBtn").disabled = !oppSel;
@@ -899,11 +1070,11 @@ $$("#modeSeg button").forEach(b => b.onclick = () => {
 async function sendDuel(){
   if (!db || !oppSel || !players[oppSel]) return;
   const s = settings(); if (!s.mins) s.mins = 10;
-  const qids = pickQuestions(s.count);
-  if (!qids.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
+  const idx = pickQuestions(s.count);
+  if (!idx.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
   const ref = db.ref("duels").push();
-  const d = { from: me.uid, fromName: me.name, to: oppSel, toName: players[oppSel].name, subj: subjId, qids,
-              mins: s.mins, neg: s.neg, title: titleFor(qids), chs: chLabels(), paper, srcLabel: srcLabel(),
+  const d = { from: me.uid, fromName: me.name, to: oppSel, toName: players[oppSel].name, subj: subjId, qids: toIds(subjId, idx),
+              mins: s.mins, neg: s.neg, title: titleFor(bank, idx), chs: chLabels(), paper, srcLabel: srcLabel(),
               mode: createMode, status: "pending", created: now() };
   if (createMode === "async") d.deadline = now() + (+$("#fDeadline").value)*3600000;
   await ref.set(d);
@@ -929,6 +1100,7 @@ function challengePopup(id){
   const d = duels[id]; if (!d) return;
   modal(`<h3 style="margin-top:0">⚔️ ${esc(d.fromName)} তোমাকে চ্যালেঞ্জ করেছে!</h3>
     <div class="info">${infoHtml(d)}</div>
+    <p class="hint">${RULE}</p>
     <div class="row" style="margin-top:14px"><button class="btn" onclick="rejectDuel('${id}')">রিজেক্ট</button><button class="btn pink" onclick="acceptDuel('${id}')">এক্সেপ্ট</button></div>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeModal()">পরে দেখবো</button>`);
 }
@@ -950,14 +1122,15 @@ function askStart(id){
   const d = duels[id]; if (!d) return;
   if (st(d).myP.start) return startDuel(id);
   modal(`<h3 style="margin-top:0">শুরু করবে?</h3><p>শুরু করলেই <b>${bn(d.mins)} মিনিটের</b> ঘড়ি চালু হবে। মাঝপথে বের হলেও ঘড়ি চলতেই থাকবে।</p>
+    <p style="font-weight:600">${RULE}</p>
     <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();startDuel('${id}')">শুরু!</button></div>`);
 }
-async function startDuel(id, auto){
+async function startDuel(id){
   const d = duels[id]; if (!d) return;
   const s = st(d);
   if (!s.canPlay) return toast("এই ডুয়েল এখন দেওয়া যাবে না");
   await loadBank(d.subj);
-  const base = { duelId: id, subj: d.subj, qids: d.qids, neg: d.neg, title: d.title, oppName: oppNameOf(d), prev: toAns(s.myP.a) };
+  const base = { duelId: id, kind: "duel", subj: d.subj, qids: dIdx(d), neg: d.neg, title: d.title, oppName: oppNameOf(d), prev: toAns(s.myP.a) };
   if (s.live){
     const go_ = () => runExam(Object.assign(base, { live: true, startAt: d.startAt, endAt: d.endAt }));
     if (now() < d.startAt) countdown(d.startAt, go_); else go_();
@@ -972,7 +1145,7 @@ function countdown(startAt, cb){
   const step = () => {
     const left = Math.ceil((startAt - now())/1000);
     if (left <= 0){ modalLocked = false; closeModal(); cb(); return; }
-    modal(`<div class="countdown">${bn(left)}</div><p style="text-align:center">একসাথে শুরু হচ্ছে...</p>`);
+    modal(`<div class="countdown">${bn(left)}</div><p style="text-align:center">একসাথে শুরু হচ্ছে...</p><p class="hint" style="text-align:center">${RULE}</p>`);
     setTimeout(step, 200);
   };
   step();
@@ -990,14 +1163,14 @@ function showDuelResult(d){
   const mine = iAmA ? r.A : r.B, hers = iAmA ? r.B : r.A;
   const ms = iAmA ? r.sa : r.sb, hs = iAmA ? r.sb : r.sa;
   const mu = iAmA ? r.ua : r.ub, hu = iAmA ? r.ub : r.ua;
-  if (!s.over){   // only my side is finished: keep hers hidden
+  if (!s.over){
     $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
       <p style="margin:0 0 8px;font-weight:700">${esc(d.title)}</p>
       <div class="crown">তোমার স্কোর: ${bn(ms.s)} / ${bn(d.qids.length)}</div>
       <div class="stats"><div><b>${bn(ms.c)}</b>সঠিক</div><div><b>${bn(ms.w)}</b>ভুল</div><div><b>${bn(ms.skip)}</b>বাদ</div></div>
       <p class="hint">🔒 ${esc(opp)} শেষ করলে পুরো রেজাল্ট দেখবে, নোটিফিকেশন পাবে।</p></div>`;
     $("#rvDiff").classList.add("hidden");
-    lastReview = { subj: d.subj, qids: d.qids, mine, hers: null };
+    lastReview = { subj: d.subj, qids: dIdx(d), mine, hers: null };
   } else {
     const w = winnerOf(d);
     const head = w === "draw" ? "ড্র! 🤝" : (w === me.uid ? "তুমি জিতেছ! 🏆" : `${esc(opp)} জিতেছে`);
@@ -1010,7 +1183,7 @@ function showDuelResult(d){
       </div>
       <p class="hint" style="padding:0 12px 12px">${esc(d.title)} · নম্বর সমান হলে যে কম সময় নিয়েছে সে জিতবে</p></div>`;
     $("#rvDiff").classList.remove("hidden");
-    lastReview = { subj: d.subj, qids: d.qids, mine, hers, herName: opp };
+    lastReview = { subj: d.subj, qids: dIdx(d), mine, hers, herName: opp };
     const ev = new Set(LS.get("rd_ev", [])); ev.add(d.id + ":res"); LS.set("rd_ev", [...ev].slice(-400));
   }
   exam = null;
@@ -1036,6 +1209,7 @@ function duelCard(d){
   } else if (s.iDone && !s.over){
     status = d.status === "pending" ? `তুমি দিয়েছ। ${esc(opp)} এর এক্সেপ্টের অপেক্ষা` : `তুমি দিয়েছ। ${esc(opp)} এর শেষ করার অপেক্ষা`;
     acts = `<button class="btn" onclick="openDuel('${d.id}')">আমার উত্তর দেখো</button>`;
+    if (d.status === "pending" && d.from === me.uid) acts += `<button class="btn" onclick="cancelDuel('${d.id}')">বাতিল</button>`;
   } else return "";
   return `<div class="blk card"><div class="top"><span class="nm">vs ${esc(opp)}</span>${tag}</div>
     <div class="info">${s.incoming ? infoHtml(d) : `<b>${esc(d.title)}</b> · ${bn(d.qids.length)} প্রশ্ন · ${bn(d.mins)} মিনিট`}${isAsync(d) && !s.incoming && !s.myP.start ? `<br>শেষ সময়: ${fmtLeft(d.deadline - now())} বাকি` : ""}</div>
@@ -1056,7 +1230,7 @@ function renderDuels(){
   $("#permHint").innerHTML = perm ? `<button class="btn" style="width:100%;margin-top:12px" onclick="askPerm()">🔔 ফোনে নোটিফিকেশন চালু করো</button>` : "";
 }
 function actionCount(){
-  return myDuels().filter(d => { const s = st(d); return s.incoming || (s.canPlay && !(d.status === "pending" && d.from === me.uid && st(d).myP.start)); }).length;
+  return myDuels().filter(d => { const s = st(d); return s.incoming || (s.canPlay && !(d.status === "pending" && d.from === me.uid)); }).length;
 }
 
 /* ============ HOME / HISTORY ============ */
@@ -1064,34 +1238,35 @@ function renderHome(){
   const n = actionCount();
   $("#duelCnt").textContent = bn(n); $("#duelCnt").classList.toggle("hidden", !n);
   $("#tsDuel").textContent = n ? `${bn(n)}টা তোমার অপেক্ষায়` : "বন্ধুর সাথে লড়াই";
-  const wr = LS.get("rd_wrong_"+subjId, []).length;
+  const wr = wrongIdx().length;
   $("#tsRev").textContent = wr ? `${bn(wr)}টা ভুল প্রশ্ন জমা` : "যেগুলো ভুল করেছ";
-  const ps = LS.get("rd_psess", []).length;
-  $("#tsPractice").textContent = ps ? `${bn(ps)}টা অনুশীলন দেওয়া` : "একা প্র্যাকটিস";
+  const ps = UD.psess.filter(p => p.type === "exam").length;
+  $("#tsPractice").textContent = ps ? `${bn(ps)}টা পরীক্ষা দেওয়া` : "পরীক্ষা বা একটা একটা করে";
 }
 function renderHistory(){
   const b = banks[subjId] || bank;
-  const st_ = LS.get("rd_chstats_"+subjId, {});
+  const st_ = UD.chstats[subjId] || {};
   const rows = Object.entries(st_).sort((a,c) => (a[1][1]/a[1][0]) - (c[1][1]/c[1][0]));
   $("#chStats").innerHTML = rows.length ? rows.map(([ch,[t,c]]) =>
-    `<div class="hrow"><span>${esc(b.chapters[ch].n)}</span><span><b>${bn(Math.round(c/t*100))}%</b> <span class="hint">(${bn(c)}/${bn(t)})</span></span></div>`).join("")
+    `<div class="hrow"><span>${esc(b.chapters[ch] ? b.chapters[ch].n : "?")}</span><span><b>${bn(Math.round(c/t*100))}%</b> <span class="hint">(${bn(c)}/${bn(t)})</span></span></div>`).join("")
     : '<p class="hint">এখনো কিছু নেই।</p>';
   const done = myDuels().filter(d => st(d).over);
-  const tally = {}; let W=0, Lo=0, D=0;
+  const tally = {}; let W=0, Lo=0;
   done.forEach(d => { const opp = oppNameOf(d), w = winnerOf(d); tally[opp] = tally[opp] || [0,0,0];
-    const k = w === me.uid ? 0 : w === "draw" ? 2 : 1; tally[opp][k]++; k===0?W++:k===1?Lo++:D++; });
+    const k = w === me.uid ? 0 : w === "draw" ? 2 : 1; tally[opp][k]++; if (k===0) W++; if (k===1) Lo++; });
   $("#h2h").innerHTML = Object.keys(tally).length ? Object.entries(tally).map(([n,[a,b2,dr]]) =>
     `<div class="hrow"><span>তুমি vs ${esc(n)}</span><span><b style="color:var(--p1)">${bn(a)}</b> - <b style="color:var(--p2)">${bn(b2)}</b>${dr ? ` <span class="hint">(${bn(dr)} ড্র)</span>` : ""}</span></div>`).join("")
     : "কোনো ডুয়েল এখনো হয়নি।";
-  const ps = LS.get("rd_psess", []);
+  const exams = UD.psess.filter(p => p.type === "exam").length;
   const answered = Object.values(st_).reduce((a,[t]) => a+t, 0), correct = Object.values(st_).reduce((a,[,c]) => a+c, 0);
   $("#sumStats").innerHTML = `<div class="stats"><div><b>${bn(done.length)}</b>ডুয়েল</div><div><b>${bn(W)}</b>জয়</div><div><b>${bn(Lo)}</b>হার</div></div>
-    <div class="stats"><div><b>${bn(ps.length)}</b>অনুশীলন</div><div><b>${bn(answered)}</b>উত্তর দিয়েছ</div><div><b>${bn(answered ? Math.round(correct/answered*100) : 0)}%</b>নির্ভুল</div></div>`;
+    <div class="stats"><div><b>${bn(exams)}</b>পরীক্ষা</div><div><b>${bn(answered)}</b>উত্তর দিয়েছ</div><div><b>${bn(answered ? Math.round(correct/answered*100) : 0)}%</b>নির্ভুল</div></div>
+    <p class="hint" style="margin:0">পরীক্ষা আর ডুয়েল থেকে হিসাব। রিভিশন আর একটা একটা করে গোনা হয় না।</p>`;
 }
 
 /* ============ INBOX (bell) ============ */
 function updateBadges(){
-  if (!me) return;
+  if (!me || !UD) return;
   const inc = myDuels().filter(d => st(d).incoming).length;
   const unread = LS.get("rd_notifs", []).filter(n => !n.read).length;
   const n = Math.max(inc, unread);
@@ -1171,6 +1346,7 @@ function closeModal(){ if (modalLocked) return; $("#modal").classList.add("hidde
 
 /* ============ BOOT ============ */
 applyTheme(LS.get("rd_theme", null));
+initFbApp();
 let booted = false;
 async function boot(){
   if (!me || !me.name){ render(); return; }
@@ -1186,6 +1362,7 @@ async function boot(){
     return;
   }
   $("#srcNote").textContent = "প্রশ্নের উৎস: " + bank.source + " · " + bn(bank.q.length) + "টি প্রশ্ন";
+  udLoadLocal();
   renderChips();
   try { initFb(); } catch(e){ console.error(e); }
   render();
