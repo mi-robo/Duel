@@ -150,7 +150,14 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
 .sst{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:54px;padding:2px 8px 4px;border:3px solid var(--line);box-shadow:3px 3px 0 var(--line);line-height:1.15}
 .sst small{font-size:11px;font-weight:700;opacity:.85}
 .sst b{font-size:19px}
-.sst.ok{background:var(--ok);color:#06210F}.sst.no{background:var(--bad);color:#2A0503}.sst.fire{background:var(--gold);color:#2A2005}
+.sst.ok{background:var(--ok);color:#06210F}.sst.no{background:var(--bad);color:#2A0503}
+.sst.fire{background:var(--gold);color:#2A2005;flex-direction:row;gap:6px;padding:4px 10px}
+.sst.fire .combo{font-size:19px;letter-spacing:.02em}
+.sst.fire.cold{opacity:.55}
+.sst.fire.cold .core{fill:#8A6A1A}
+.sst.fire.hot{background:#FF8A3D}
+@media (prefers-reduced-motion:no-preference){.sst.fire.bump{animation:bump .3s steps(3)}}
+@keyframes bump{50%{transform:scale(1.18)}}
 .mright{display:flex;align-items:center;gap:8px}
 .savebtn{display:inline-flex;align-items:center;gap:5px;border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:1px 8px;font-size:13px;font-weight:700;cursor:pointer;flex:0 0 auto}
 .savebtn svg path{fill:none}
@@ -256,7 +263,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
   <section id="s-solo" class="hidden">
     <div class="solo-bar">
       <button class="btn" onclick="endSolo()">← শেষ করো</button>
-      <div class="solo-stats"><span class="sst ok"><small>সঠিক</small><b id="soC">০</b></span><span class="sst no"><small>ভুল</small><b id="soW">০</b></span><span class="sst fire"><small>টানা</small><b id="soS">০</b></span></div>
+      <div class="solo-stats"><span class="sst ok"><small>সঠিক</small><b id="soC">০</b></span><span class="sst no"><small>ভুল</small><b id="soW">০</b></span><span class="sst fire" id="soFire" role="img" aria-label="টানা সঠিক কম্বো"><svg class="flame" viewBox="0 0 9 11" width="18" height="22" shape-rendering="crispEdges" aria-hidden="true"><path d="M4 0h1v1h1v1h1v2h1v5h-1v1h-1v1H2v-1H1V9H0V5h1V3h1v1h1V2h1z" fill="#2A2005"/><path class="core" d="M4 4h1v1h1v1h1v3H6v1H3V9H2V7h1V6h1z" fill="#FF7A1A"/><path d="M4 7h1v1h1v1H3V8h1z" fill="#FFF3C4"/></svg><b class="combo">×<span id="soS">০</span></b></span></div>
     </div>
     <div id="soloCard"></div>
   </section>
@@ -773,7 +780,15 @@ function soloNext(){
   if (solo.i >= solo.list.length - 1) return endSolo();
   solo.i++; renderSolo(); window.scrollTo(0,0);
 }
-function updateSoloStats(){ $("#soC").textContent = bn(solo.c); $("#soW").textContent = bn(solo.w); $("#soS").textContent = bn(solo.streak); }
+let lastStreak = 0;
+function updateSoloStats(){
+  $("#soC").textContent = bn(solo.c); $("#soW").textContent = bn(solo.w); $("#soS").textContent = bn(solo.streak);
+  const f = $("#soFire");
+  f.classList.toggle("cold", solo.streak === 0);
+  f.classList.toggle("hot", solo.streak >= 5);
+  if (solo.streak > lastStreak){ f.classList.remove("bump"); void f.offsetWidth; f.classList.add("bump"); }
+  lastStreak = solo.streak;
+}
 function endSolo(){
   const s = solo; solo = null;
   if (!s) return go("practice");
