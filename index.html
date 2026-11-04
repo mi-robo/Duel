@@ -146,12 +146,22 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
 @media (max-width:520px){.vs .big{font-size:26px}.timer{font-size:22px}body{font-size:16px}}
 /* ===== v3 additions ===== */
 .solo-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px}
-.solo-stats{display:flex;gap:6px;font-weight:700}
-.solo-stats span{border:3px solid var(--line);background:var(--panel);padding:2px 8px}
+.solo-stats{display:flex;gap:8px}
+.sst{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:54px;padding:2px 8px 4px;border:3px solid var(--line);box-shadow:3px 3px 0 var(--line);line-height:1.15}
+.sst small{font-size:11px;font-weight:700;opacity:.85}
+.sst b{font-size:19px}
+.sst.ok{background:var(--ok);color:#06210F}.sst.no{background:var(--bad);color:#2A0503}.sst.fire{background:var(--gold);color:#2A2005}
+.mright{display:flex;align-items:center;gap:8px}
+.savebtn{display:inline-flex;align-items:center;gap:5px;border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:1px 8px;font-size:13px;font-weight:700;cursor:pointer;flex:0 0 auto}
+.savebtn svg path{fill:none}
+.savebtn[aria-pressed="true"]{background:var(--gold);color:#2A2005}
+.savebtn[aria-pressed="true"] svg path{fill:currentColor}
+.mtag.ta{background:var(--gold);color:#2A2005}
 .verdict{font-weight:700;font-size:18px;margin:12px 0 0}
 .verdict.ok{color:var(--ok)}.verdict.no{color:var(--bad)}
-.solo-nav{display:flex;gap:10px;margin-top:14px}
-.solo-nav .btn{flex:1}
+.solo-nav{display:flex;gap:8px;margin-top:14px}
+.solo-nav .btn{flex:1;padding:10px 6px}
+.solo-nav .btn:disabled{opacity:.4}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .tile{position:relative;text-align:left;border:3px solid var(--line);box-shadow:var(--shadow);padding:18px 16px;min-height:140px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;color:#13202E}
 .tile:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--line)}
@@ -219,7 +229,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
       <button class="tile t-practice" onclick="go('practice')"><span class="ic">📘</span><span><span class="tt">অনুশীলন</span><br><span class="ts" id="tsPractice">একা প্র্যাকটিস</span></span></button>
       <button class="tile t-duel" onclick="go('duels')"><span class="ic">⚔️</span><span><span class="tt">ডুয়েল</span><br><span class="ts" id="tsDuel">বন্ধুর সাথে লড়াই</span></span><span id="duelCnt" class="cnt hidden"></span></button>
       <button class="tile t-history" onclick="go('history')"><span class="ic">📊</span><span><span class="tt">ইতিহাস</span><br><span class="ts" id="tsHistory">রেকর্ড ও দুর্বল অধ্যায়</span></span></button>
-      <button class="tile t-rev" onclick="go('revision')"><span class="ic">🔁</span><span><span class="tt">ভুলের রিভিশন</span><br><span class="ts" id="tsRev">যেগুলো ভুল করেছ</span></span></button>
+      <button class="tile t-rev" onclick="go('revision')"><span class="ic">🔁</span><span><span class="tt">রিভিশন</span><br><span class="ts" id="tsRev">ভুল আর সেভ করা প্রশ্ন</span></span></button>
     </div>
     <div id="homeAlert"></div>
   </section>
@@ -230,8 +240,9 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
     <div class="blk panel">
       <span class="lbl">কীভাবে অনুশীলন করবে?</span>
       <div class="seg" id="pmodeSeg">
-        <button type="button" data-pm="exam" aria-pressed="true">📝 পরীক্ষা দিয়ে</button>
-        <button type="button" data-pm="solo" aria-pressed="false">🎯 একটা একটা করে</button>
+        <button type="button" data-pm="exam" aria-pressed="true">পরীক্ষা</button>
+        <button type="button" data-pm="solo" aria-pressed="false">একটা একটা করে</button>
+        <button type="button" data-pm="ta" aria-pressed="false">টাইম অ্যাটাক</button>
       </div>
       <p class="hint" id="pmodeHint">সময় ধরে পরীক্ষা, শেষে রেজাল্ট।</p>
     </div>
@@ -245,19 +256,24 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
   <section id="s-solo" class="hidden">
     <div class="solo-bar">
       <button class="btn" onclick="endSolo()">← শেষ করো</button>
-      <div class="solo-stats"><span title="সঠিক">✅ <b id="soC">০</b></span><span title="ভুল">❌ <b id="soW">০</b></span><span title="টানা সঠিক">🔥 <b id="soS">০</b></span></div>
+      <div class="solo-stats"><span class="sst ok"><small>সঠিক</small><b id="soC">০</b></span><span class="sst no"><small>ভুল</small><b id="soW">০</b></span><span class="sst fire"><small>টানা</small><b id="soS">০</b></span></div>
     </div>
     <div id="soloCard"></div>
   </section>
 
   <!-- Revision -->
   <section id="s-revision" class="hidden">
-    <div class="backbar"><button class="backbtn" onclick="go('home')" aria-label="পেছনে">←</button><h2>ভুলের রিভিশন</h2></div>
+    <div class="backbar"><button class="backbtn" onclick="go('home')" aria-label="পেছনে">←</button><h2>রিভিশন</h2></div>
     <div class="blk panel">
-      <p style="margin-top:0">মোট <b id="rvTotal">০</b>টা ভুল প্রশ্ন জমা আছে। এখানে ঠিক করলে লিস্ট থেকে সরে যাবে।</p>
+      <div class="seg" id="rvKindSeg" style="margin-bottom:12px">
+        <button type="button" data-k="wrong" aria-pressed="true">ভুল প্রশ্ন</button>
+        <button type="button" data-k="saved" aria-pressed="false">সেভড প্রশ্ন</button>
+      </div>
+      <p id="rvIntro" style="margin-top:0"></p>
+      <div class="field"><label for="rvSubject">বিষয়</label><select id="rvSubject"></select></div>
       <span class="lbl">অধ্যায়</span>
       <div id="rvChips" class="chips"></div>
-      <p class="hint">কোনো অধ্যায় না বাছলে সব থেকে আসবে।</p>
+      <p class="hint">কোনো অধ্যায় না বাছলে সবগুলো থেকে আসবে।</p>
       <div class="row">
         <div class="field"><label for="rvSrc">উৎস</label>
           <select id="rvSrc">
@@ -269,9 +285,14 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
             <option value="s:DU">ঢাবি (DU)</option><option value="s:JU">জাবি (JU)</option><option value="s:RU">রাবি (RU)</option>
             <option value="s:CU">চবি (CU)</option><option value="s:GST">গুচ্ছ (GST)</option><option value="s:DU7">ঢাবি ৭ কলেজ</option>
           </select></div>
-        <div class="field"><label for="rvCount">কতগুলো?</label><input id="rvCount" type="number" min="1" max="200" value="20"></div>
+        <div class="field" id="rvCountF"><label for="rvCount">কতগুলো?</label><input id="rvCount" type="number" min="1" max="200" value="20"></div>
       </div>
-      <p class="hint" style="margin:0">পাওয়া যাচ্ছে: <b id="rvPoolN">০</b>টা · সময় নেই · উত্তর বদলানো যাবে · যেকোনো সময় বের হতে পারবে</p>
+      <span class="lbl">কীভাবে?</span>
+      <div class="seg" id="rvModeSeg">
+        <button type="button" data-m="exam" aria-pressed="true">পরীক্ষার মতো</button>
+        <button type="button" data-m="solo" aria-pressed="false">একটা একটা করে</button>
+      </div>
+      <p class="hint" style="margin-bottom:0">পাওয়া যাচ্ছে: <b id="rvPoolN">০</b>টা · সময় নেই · যেকোনো সময় বের হতে পারবে</p>
     </div>
     <button class="btn primary big-cta" onclick="startRevision()">রিভিশন শুরু</button>
   </section>
@@ -301,6 +322,12 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
         <button type="button" data-mode="async" aria-pressed="false">🕒 যখন খুশি</button>
       </div>
       <p class="hint" id="modeHint">দুজন একসাথে শুরু করবে। ওকে অনলাইনে থাকতে হবে।</p>
+      <span class="lbl">ধরন</span>
+      <div class="seg" id="typeSeg">
+        <button type="button" data-t="normal" aria-pressed="true">সাধারণ পরীক্ষা</button>
+        <button type="button" data-t="ta" aria-pressed="false">টাইম অ্যাটাক</button>
+      </div>
+      <p class="hint" id="typeHint">বেশি নম্বর যার, সে জিতবে।</p>
       <div class="field hidden" id="deadlineBox"><label for="fDeadline">কতক্ষণের মধ্যে দিতে হবে?</label>
         <select id="fDeadline"><option value="1">১ ঘণ্টা</option><option value="3">৩ ঘণ্টা</option><option value="6">৬ ঘণ্টা</option><option value="10" selected>১০ ঘণ্টা</option><option value="24">২৪ ঘণ্টা</option></select>
       </div>
@@ -380,16 +407,16 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
           <button type="button" data-paper="2" aria-pressed="false">২য় পত্র</button>
         </div>
         <div id="chips" class="chips"></div>
-        <p class="hint">কোনো অধ্যায় না বাছলে সব অধ্যায় থেকে আসবে। পাওয়া যাচ্ছে: <span id="poolN" class="count">0</span>টি প্রশ্ন</p>
+        <p class="hint">কোনো অধ্যায় না বাছলে প্রতিটা অধ্যায় থেকে অন্তত ১টা করে আসবে (প্রশ্ন কম হলে বেশি গুরুত্বপূর্ণ অধ্যায় আগে)। পাওয়া যাচ্ছে: <span id="poolN" class="count">0</span>টি প্রশ্ন</p>
       </div>
-      <div class="row exam-only">
-        <div class="field"><label for="fCount">প্রশ্ন সংখ্যা</label><input id="fCount" type="number" min="5" max="200" value="25"></div>
-        <div class="field"><label for="fTime">সময় (মিনিট)</label>
+      <div class="row" id="fRowCT">
+        <div class="field" id="fCountF"><label for="fCount">প্রশ্ন সংখ্যা</label><input id="fCount" type="number" min="5" max="200" value="25"></div>
+        <div class="field" id="fTimeF"><label for="fTime" id="fTimeLbl">সময় (মিনিট)</label>
           <select id="fTime"><option value="0" id="noTimeOpt">সময় ছাড়া</option><option>5</option><option selected>10</option><option>15</option><option>20</option><option>30</option><option>45</option><option>60</option><option value="custom">নিজে দেব</option></select>
           <input id="fTimeCustom" class="hidden" type="number" min="1" max="180" placeholder="মিনিট" style="margin-top:6px">
         </div>
       </div>
-      <div class="field exam-only"><label class="check"><input id="fNeg" type="checkbox"> নেগেটিভ মার্কিং (ভুলে −০.২৫)</label></div>
+      <div class="field" id="fNegF"><label class="check"><input id="fNeg" type="checkbox"> নেগেটিভ মার্কিং (ভুলে −০.২৫)</label></div>
       <div class="field" style="margin-bottom:0"><label class="check"><input id="fFresh" type="checkbox" checked> আগে না দেখা প্রশ্ন আগে দাও</label></div>
     </div>
   </div>
@@ -434,6 +461,9 @@ const dateBn = t => new Date(t).toLocaleDateString("bn-BD", { day: "numeric", mo
 let toastT = null;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.remove("hidden"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add("hidden"), 2600); }
 const RULE = "⚠️ একবার কোনো অপশন বাছলে আর বদলানো যাবে না (আসল পরীক্ষার OMR এর মতো)।";
+const TA_PEN = 10;   // seconds added for each wrong or unanswered question in time attack
+const RULE_TA = "⚠️ একটা করে প্রশ্ন আসবে, উত্তর দিলেই পরেরটা। উত্তর বদলানো যাবে না। প্রতিটা ভুল বা বাদ = +১০ সেকেন্ড।";
+const ruleOf = d => d && d.ta ? RULE_TA : RULE;
 
 /* ============ STATE ============ */
 let me = LS.get("rd_me", null);
@@ -458,7 +488,7 @@ const toIdx = (subj, arr) => (arr || []).map(x => qIndex(subj, x));
 const toIds = (subj, arr) => arr.map(i => qId(subj, i));
 
 /* ============ SYNCED USER DATA ============ */
-function udBlank(){ return { upd: 0, seen: {}, wrong: {}, chstats: {}, psess: [] }; }
+function udBlank(){ return { upd: 0, seen: {}, wrong: {}, chstats: {}, psess: [], saved: {}, tabest: {} }; }
 function udLoadLocal(){
   UD = LS.get("rd_ud_" + me.uid, null);
   if (!UD){   // first run of this version: bring over old local data
@@ -475,6 +505,8 @@ function udLoadLocal(){
     }
     LS.set("rd_ud_" + me.uid, UD);
   }
+  UD = Object.assign(udBlank(), UD);
+  UD.psess = (UD.psess || []).filter(p => p && p.type !== "solo");   // one-by-one is no longer kept in history
 }
 let udT = null, udApplying = false;
 function udSave(){
@@ -509,7 +541,7 @@ function render(){
   if (!SCREENS.includes(s)) s = "home";
   SCREENS.forEach(x => $("#s-"+x).classList.toggle("hidden", x !== s));
   if (s === "practice"){ $("#practiceFilters").appendChild($("#filterBox")); $("#noTimeOpt").disabled = false; setPMode(practiceMode); }
-  if (s === "create"){ $("#createFilters").appendChild($("#filterBox")); $$(".exam-only").forEach(e => e.classList.remove("hidden")); $("#noTimeOpt").disabled = true; if ($("#fTime").value === "0") $("#fTime").value = "10"; }
+  if (s === "create"){ $("#createFilters").appendChild($("#filterBox")); applyCreateFields(); $("#noTimeOpt").disabled = true; if ($("#fTime").value === "0") $("#fTime").value = "10"; }
   window.scrollTo(0,0);
   refreshScreen(s);
 }
@@ -563,6 +595,7 @@ async function loadBank(id){
   if (banks[id]) return banks[id];
   const s = SUBJECTS.find(x => x.id === id);
   const d = await (await fetch(s.file, { cache: "no-cache" })).json();
+  if (d.q.length && d.q[0][7] === undefined){ d.old = true; d.q.forEach((q,i) => q[7] = "i" + i); }   // old file without question IDs
   d.idx = new Map(d.q.map((q,i) => [q[7], i]));
   banks[id] = d; return d;
 }
@@ -606,11 +639,24 @@ function pool(){
 }
 function updatePool(){ $("#poolN").textContent = bn(pool().length); }
 const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+/* Every chapter in the pool gets at least 1 question. If n is smaller than the number of chapters,
+   chapters are drawn at random but weighted by how many questions they have (more questions = asked more in admissions). */
+function spread(ordered, n, chapterOf){
+  const byCh = new Map();
+  ordered.forEach(i => { const c = chapterOf(i); if (!byCh.has(c)) byCh.set(c, []); byCh.get(c).push(i); });
+  if (byCh.size <= 1 || n >= ordered.length) return ordered.slice(0, n);
+  let chs = [...byCh.keys()];
+  if (n < chs.length)
+    chs = chs.map(c => ({ c, k: Math.pow(Math.random(), 1 / byCh.get(c).length) })).sort((a, b) => b.k - a.k).slice(0, n).map(x => x.c);
+  const first = chs.map(c => byCh.get(c)[0]);
+  const used = new Set(first);
+  return shuffle(first.concat(ordered.filter(i => !used.has(i)).slice(0, n - first.length)));
+}
 function pickQuestions(n){
   const all = pool(), seen = new Set(udArr("seen", subjId));
   const isSeen = i => seen.has(qId(subjId, i));
-  const list = $("#fFresh").checked ? shuffle(all.filter(i => !isSeen(i))).concat(shuffle(all.filter(isSeen))) : shuffle(all);
-  return list.slice(0, n);
+  const ordered = $("#fFresh").checked ? shuffle(all.filter(i => !isSeen(i))).concat(shuffle(all.filter(isSeen))) : shuffle(all);
+  return spread(ordered, n, i => bank.q[i][0]);
 }
 function settings(){
   let mins = $("#fTime").value;
@@ -628,15 +674,26 @@ function titleFor(b, idxs){
 
 /* ============ PRACTICE ============ */
 let practiceMode = LS.get("rd_pmode", "exam"), solo = null;
+function setFields(count, time, neg, timeLbl){
+  $("#fCountF").classList.toggle("hidden", !count);
+  $("#fTimeF").classList.toggle("hidden", !time);
+  $("#fRowCT").classList.toggle("hidden", !count && !time);
+  $("#fNegF").classList.toggle("hidden", !neg);
+  $("#fTimeLbl").textContent = timeLbl || "সময় (মিনিট)";
+}
 function setPMode(m){
+  if (!["exam","solo","ta"].includes(m)) m = "exam";
   practiceMode = m; LS.set("rd_pmode", m);
   $$("#pmodeSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.pm === m));
-  $$(".exam-only").forEach(e => e.classList.toggle("hidden", m === "solo"));
-  $("#pmodeHint").textContent = m === "solo" ? "একটা করে প্রশ্ন। উত্তর দিলেই দেখাবে ঠিক না ভুল, ব্যাখ্যা থাকলে সেটাও।" : "সময় ধরে পরীক্ষা, শেষে রেজাল্ট।";
+  if (m === "exam") setFields(1, 1, 1); else if (m === "solo") setFields(0, 0, 0); else setFields(1, 0, 0);
+  $("#pmodeHint").textContent = { exam: "সময় ধরে পরীক্ষা, শেষে রেজাল্ট।",
+    solo: "একটা করে প্রশ্ন, সাথে সাথে দেখাবে ঠিক না ভুল। দরকারি প্রশ্ন সেভ করে রাখতে পারবে।",
+    ta: "কয়টা প্রশ্ন সেটা ঠিক করো, তারপর যত দ্রুত পারো। প্রতিটা ভুল +১০ সেকেন্ড। নিজের রেকর্ড ভাঙো।" }[m];
 }
 $$("#pmodeSeg button").forEach(b => b.onclick = () => setPMode(b.dataset.pm));
 function startPractice(){
-  if (practiceMode === "solo") return startSolo();
+  if (practiceMode === "solo") return startSolo(pickQuestions(pool().length), "practice", "practice");
+  if (practiceMode === "ta") return startTA();
   const s = settings(), qids = pickQuestions(s.count);
   if (!qids.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
   const title = titleFor(bank, qids);
@@ -666,93 +723,199 @@ function renderPracticeList(){
 function openPractice(i){ const p = UD.psess[i]; if (p) showPracticeResult(Object.assign({}, p, { qids: toIdx(p.subj, p.ids) }), false, "practice"); }
 
 /* ---- one by one ---- */
-function startSolo(){
-  const list = pickQuestions(pool().length);
+function startSolo(list, kind, back){
   if (!list.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
-  solo = { subj: subjId, list, i: 0, ans: {}, c: 0, w: 0, streak: 0, best: 0, t: Date.now(), picked: null };
+  solo = { subj: subjId, list, i: 0, st: {}, c: 0, w: 0, streak: 0, best: 0, kind, back };
   go("solo"); renderSolo();
 }
 function renderSolo(){
-  const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi];
-  solo.picked = null;
+  const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi], pk = solo.st[solo.i], done = pk !== undefined;
+  const opts = q[2].map((o,j) => {
+    const cls = !done ? "" : j === q[3] ? "right" : (j === pk ? "wrong" : "");
+    return `<button class="opt ${cls}" data-j="${j}" ${done ? "disabled" : ""} onclick="soloAnswer(${j})"><b>${L[j]}</b><span>${esc(o)}</span></button>`;
+  }).join("");
+  let after = "";
+  if (done){
+    const ok = pk === q[3];
+    after = (pk === -1 ? `<p class="verdict">সঠিক উত্তর: ${L[q[3]]}</p>` : `<p class="verdict ${ok ? "ok" : "no"}">${ok ? "সঠিক!" : `ভুল। সঠিক উত্তর: ${L[q[3]]}`}</p>`)
+      + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
+  }
+  const last = solo.i >= solo.list.length - 1;
   $("#soloCard").innerHTML = `<article class="blk q">
-    <div class="meta"><span>${bn(solo.i+1)}/${bn(solo.list.length)} · ${esc(b.chapters[q[0]].n)}</span><span>${esc(q[4]||"")}</span></div>
-    <h3>${esc(q[1])}</h3>
-    <div class="opts">${q[2].map((o,j) => `<button class="opt" data-j="${j}" onclick="soloAnswer(${j})"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
-    <div id="soloAfter"></div>
+    <div class="meta"><span>${bn(solo.i+1)}/${bn(solo.list.length)} · ${esc(b.chapters[q[0]].n)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(solo.subj, qi)}</span></div>
+    <h3>${esc(q[1])}</h3><div class="opts">${opts}</div>${after}
   </article>
-  <div class="solo-nav" id="soloNav"><button class="btn ghost" onclick="soloReveal()">👁 উত্তর দেখাও</button><button class="btn" onclick="soloNext()">এড়িয়ে যাও →</button></div>`;
+  <div class="solo-nav">
+    <button class="btn" onclick="soloPrev()" ${solo.i ? "" : "disabled"}>← আগের</button>
+    ${done ? "" : `<button class="btn ghost" onclick="soloReveal()">উত্তর দেখাও</button>`}
+    <button class="btn ${done ? "primary" : ""}" onclick="soloNext()">${last ? "শেষ" : done ? "পরের →" : "এড়িয়ে যাও →"}</button>
+  </div>`;
   updateSoloStats();
-}
-function soloShow(q, pickedWrong){
-  $$("#soloCard .opt").forEach(btn => {
-    const k = +btn.dataset.j; btn.disabled = true;
-    if (k === q[3]) btn.classList.add("right"); else if (k === pickedWrong) btn.classList.add("wrong");
-  });
-  $("#soloNav").innerHTML = `<button class="btn primary" style="flex:1" onclick="soloNext()">পরের প্রশ্ন →</button>`;
 }
 function soloAnswer(j){
-  if (solo.picked !== null) return;
-  solo.picked = j;
-  const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi], ok = j === q[3];
-  solo.ans[solo.i] = j;
+  if (!solo || solo.st[solo.i] !== undefined) return;
+  const qi = solo.list[solo.i], q = banks[solo.subj].q[qi], ok = j === q[3];
+  solo.st[solo.i] = j;
   if (ok){ solo.c++; solo.streak++; solo.best = Math.max(solo.best, solo.streak); } else { solo.w++; solo.streak = 0; }
-  soloShow(q, j);
-  $("#soloAfter").innerHTML = `<p class="verdict ${ok ? "ok" : "no"}">${ok ? "সঠিক! ✅" : `ভুল ❌ সঠিক উত্তর: ${L[q[3]]}`}</p>` + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
   markSeen(solo.subj, [qi]);
-  if (navigator.vibrate && !ok) navigator.vibrate(80);
-  updateSoloStats();
+  if (ok && solo.kind === "rev-wrong") fixWrong(solo.subj, qi);
+  if (!ok && navigator.vibrate) navigator.vibrate(80);
+  renderSolo();
 }
 function soloReveal(){
-  if (solo.picked !== null) return;
-  solo.picked = -1;
-  const q = banks[solo.subj].q[solo.list[solo.i]];
-  soloShow(q, -1);
-  $("#soloAfter").innerHTML = `<p class="verdict">সঠিক উত্তর: ${L[q[3]]}</p>` + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
+  if (!solo || solo.st[solo.i] !== undefined) return;
+  solo.st[solo.i] = -1;
   markSeen(solo.subj, [solo.list[solo.i]]);
+  renderSolo();
+}
+function soloPrev(){ if (solo.i > 0){ solo.i--; renderSolo(); window.scrollTo(0,0); } }
+function soloNext(){
+  if (solo.i >= solo.list.length - 1) return endSolo();
+  solo.i++; renderSolo(); window.scrollTo(0,0);
 }
 function updateSoloStats(){ $("#soC").textContent = bn(solo.c); $("#soW").textContent = bn(solo.w); $("#soS").textContent = bn(solo.streak); }
-function soloNext(){
-  solo.i++;
-  if (solo.i >= solo.list.length){ toast("এই ফিল্টারের সব প্রশ্ন শেষ! 🎉"); return endSolo(); }
-  renderSolo(); window.scrollTo(0,0);
-}
 function endSolo(){
   const s = solo; solo = null;
   if (!s) return go("practice");
-  const idx = Object.keys(s.ans).map(Number);
-  if (!idx.length) return go("practice");
-  const qids = idx.map(i => s.list[i]), ans = {};
-  idx.forEach((i,k) => ans[k] = s.ans[i]);
-  const b = banks[s.subj], title = titleFor(b, qids);
-  savePractice({ type: "solo", title, subj: s.subj, ids: toIds(s.subj, qids), ans, neg: false, used: Date.now() - s.t });
-  showPracticeResult({ title, subj: s.subj, qids, ans, neg: false, used: Date.now() - s.t, type: "solo" }, false, "practice");
-  if (s.best >= 3) toast(`সর্বোচ্চ টানা সঠিক: ${bn(s.best)} 🔥`);
+  if (s.c + s.w) toast(`${bn(s.c)}টা সঠিক · ${bn(s.w)}টা ভুল` + (s.best >= 3 ? ` · টানা সর্বোচ্চ ${bn(s.best)}` : ""));
+  go(s.back);
+}
+function fixWrong(subj, qi){
+  const id = qId(subj, qi), arr = udArr("wrong", subj), k = arr.indexOf(id);
+  if (k >= 0){ arr.splice(k, 1); udSave(); }
 }
 
-/* ---- mistake revision ---- */
-let rvCh = new Set();
-function wrongIdx(){ return toIdx(subjId, udArr("wrong", subjId)).filter(i => i >= 0); }
+/* ---- saved questions ---- */
+const SAVE_ICON = '<svg width="12" height="14" viewBox="0 0 12 14" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 1h10v12l-5-3.5L1 13z" stroke="currentColor" stroke-width="2"/></svg>';
+const isSaved = (subj, qi) => udArr("saved", subj).includes(qId(subj, qi));
+function saveBtn(subj, qi){
+  if (qi < 0) return "";
+  const on = isSaved(subj, qi);
+  return `<button type="button" class="savebtn" data-s="${subj}" data-q="${qi}" aria-pressed="${on}" aria-label="${on ? "সেভ থেকে সরাও" : "প্রশ্নটা সেভ করো"}">${SAVE_ICON}<span>${on ? "সেভড" : "সেভ"}</span></button>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".savebtn"); if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  toggleSave(b.dataset.s, +b.dataset.q);
+});
+function toggleSave(subj, qi){
+  const id = qId(subj, qi), arr = udArr("saved", subj), k = arr.indexOf(id);
+  if (k >= 0) arr.splice(k, 1); else arr.push(id);
+  udSave();
+  const on = k < 0;
+  $$(`.savebtn[data-s="${subj}"][data-q="${qi}"]`).forEach(b => {
+    b.setAttribute("aria-pressed", on); b.querySelector("span").textContent = on ? "সেভড" : "সেভ";
+    b.setAttribute("aria-label", on ? "সেভ থেকে সরাও" : "প্রশ্নটা সেভ করো");
+  });
+  toast(on ? "প্রশ্ন সেভ হয়েছে" : "সেভ থেকে সরানো হলো");
+}
+
+/* ---- time attack ---- */
+function taScore(b, ans, idx, usedMs){
+  const r = scoreWith(b, ans, idx, false);
+  const missing = idx.filter(i => i >= 0).length - r.c - r.w;
+  const pen = (r.w + missing) * TA_PEN;
+  return Object.assign(r, { used: usedMs, missing, pen, total: Math.round(usedMs/1000) + pen });
+}
+function taKey(n){ return [subjId, $("#fSrc").value, paper, [...pickedCh].sort((a,b) => a-b).join("."), n].join("|"); }
+function startTA(){
+  const n = settings().count, qids = pickQuestions(n);
+  if (!qids.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
+  const title = titleFor(bank, qids), key = taKey(qids.length), best = UD.tabest[key];
+  modal(`<h3 style="margin-top:0">টাইম অ্যাটাক</h3>
+    <div class="info"><b>${esc(title)}</b><br><b>${bn(qids.length)}</b> প্রশ্ন${best ? ` · তোমার রেকর্ড <b>${fmt(best.s)}</b>` : " · এখনো কোনো রেকর্ড নেই"}</div>
+    <p style="font-weight:600">${RULE_TA}</p>
+    <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn primary" id="goTA">শুরু!</button></div>`);
+  $("#goTA").onclick = () => {
+    closeModal();
+    countdown(now() + 3000, () => runExam({ kind: "ta", ta: true, subj: subjId, qids, neg: false, title, taKey: key, startAt: Date.now(), endAt: 0 }), "তৈরি হও...", RULE_TA);
+  };
+}
+function renderTA(){
+  const b = banks[exam.subj], k = exam.cur, qi = exam.qids[k], q = b.q[qi];
+  $("#qList").innerHTML = `<article class="blk q">
+    <div class="meta"><span>${bn(k+1)}/${bn(exam.qids.length)} · ${esc(b.chapters[q[0]].n)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(exam.subj, qi)}</span></div>
+    <h3>${esc(q[1])}</h3>
+    <div class="opts">${q[2].map((o,j) => `<button class="opt" data-j="${j}" onclick="taAnswer(${j})"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
+  </article>`;
+}
+function taAdvance(){
+  while (exam.cur < exam.qids.length && (exam.ans[exam.cur] !== undefined || exam.qids[exam.cur] < 0)) exam.cur++;
+  if (exam.cur >= exam.qids.length) submit(false); else renderTA();
+}
+function taAnswer(j){
+  if (!exam || exam.done || exam.taLock) return;
+  const k = exam.cur, q = banks[exam.subj].q[exam.qids[k]], ok = j === q[3];
+  exam.ans[k] = j; exam.taLock = true;
+  if (exam.duelId && db) db.ref(`duels/${exam.duelId}/p/${me.uid}/a/${k}`).set(j);
+  $$("#qList .opt").forEach(b => { const x = +b.dataset.j; b.disabled = true; if (x === q[3]) b.classList.add("right"); else if (x === j) b.classList.add("wrong"); });
+  if (!ok){ toast("+১০ সেকেন্ড"); if (navigator.vibrate) navigator.vibrate(80); }
+  updateProg(); tick();
+  const ex = exam;
+  setTimeout(() => { ex.taLock = false; if (exam === ex && !ex.done) taAdvance(); }, ok ? 300 : 900);
+}
+function taWrongNow(){
+  const b = banks[exam.subj]; let w = 0;
+  Object.entries(exam.ans).forEach(([k,j]) => { const qi = exam.qids[+k]; if (qi >= 0 && j !== b.q[qi][3]) w++; });
+  return w;
+}
+function showTAResult(timeUp){
+  const b = banks[exam.subj], r = taScore(b, exam.ans, exam.qids, exam.usedMs);
+  const prev = UD.tabest[exam.taKey];
+  let msg = prev ? `<p class="hint">তোমার রেকর্ড: <b>${fmt(prev.s)}</b></p>` : "";
+  if (!r.missing && (!prev || r.total < prev.s)){
+    UD.tabest[exam.taKey] = { s: r.total, t: Date.now() }; udSave();
+    msg = `<p style="font-weight:700;color:var(--ok)">${prev ? `নতুন রেকর্ড! আগেরটা ছিল ${fmt(prev.s)}` : "প্রথম রেকর্ড সেট হলো! এবার এটা ভাঙো।"}</p>`;
+  } else if (r.missing) msg += `<p class="hint">সব প্রশ্নের উত্তর না দিলে রেকর্ড গোনা হয় না।</p>`;
+  $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
+    ${timeUp ? '<p class="hint">সময় শেষ!</p>' : ""}<p style="margin:0 0 8px;font-weight:700">${esc(exam.title)} · টাইম অ্যাটাক</p>
+    <div class="crown">${fmt(r.total)}</div>
+    <div class="stats"><div><b>${bn(r.c)}</b>সঠিক</div><div><b>${bn(r.w + r.missing)}</b>ভুল/বাদ</div><div><b>+${bn(r.pen)}</b>সেকেন্ড</div></div>
+    <p class="hint">আসল সময় ${fmt(Math.round(r.used/1000))} · প্রতি প্রশ্নে গড়ে ${bn((r.used/1000/Math.max(1, exam.qids.length)).toFixed(1))} সেকেন্ড</p>${msg}</div>`;
+  $("#rvDiff").classList.add("hidden");
+  lastReview = { subj: exam.subj, qids: exam.qids, mine: exam.ans, hers: null };
+  openResult("practice");
+}
+
+/* ---- revision: mistakes + saved ---- */
+let rvCh = new Set(), rvKind = "wrong", rvMode = "exam";
+function listIdx(kind){ return toIdx(subjId, udArr(kind === "saved" ? "saved" : "wrong", subjId)).filter(i => i >= 0); }
+function wrongIdx(){ return listIdx("wrong"); }
 function rvPool(){
   const src = $("#rvSrc").value;
-  return wrongIdx().filter(i => { const q = bank.q[i]; return (!rvCh.size || rvCh.has(q[0])) && srcMatch(bank, q, src); });
+  return listIdx(rvKind).filter(i => { const q = bank.q[i]; return (!rvCh.size || rvCh.has(q[0])) && srcMatch(bank, q, src); });
 }
 function renderRevision(){
-  const all = wrongIdx(), counts = {};
+  $$("#rvKindSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.k === rvKind));
+  $$("#rvModeSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.m === rvMode));
+  $("#rvCountF").classList.toggle("hidden", rvMode === "solo");
+  $("#rvSubject").value = subjId;
+  const all = listIdx(rvKind), counts = {};
   all.forEach(i => { const c = bank.q[i][0]; counts[c] = (counts[c]||0) + 1; });
   [...rvCh].forEach(c => { if (!counts[c]) rvCh.delete(c); });
-  $("#rvTotal").textContent = bn(all.length);
+  $("#rvIntro").innerHTML = rvKind === "wrong"
+    ? `মোট <b>${bn(all.length)}</b>টা ভুল প্রশ্ন জমা আছে। এখানে ঠিক করলে লিস্ট থেকে সরে যাবে।`
+    : `মোট <b>${bn(all.length)}</b>টা প্রশ্ন সেভ করা আছে। প্রশ্নের পাশে "সেভড" এ চাপলে সরে যাবে।`;
   $("#rvChips").innerHTML = Object.keys(counts).length ? Object.keys(counts).map(Number).sort((a,b) => a-b).map(c =>
     `<button type="button" class="chip" data-c="${c}" aria-pressed="${rvCh.has(c)}">${esc(bank.chapters[c].n)} <small>${bn(counts[c])}</small></button>`).join("")
-    : '<p class="hint">এখনো কোনো ভুল জমা হয়নি 👏 পরীক্ষা বা ডুয়েলে যেগুলো ভুল করবে, এখানে আসবে।</p>';
+    : `<p class="hint">${rvKind === "wrong" ? "এখনো কোনো ভুল জমা হয়নি। পরীক্ষা বা ডুয়েলে যেগুলো ভুল করবে, এখানে আসবে।" : "এখনো কিছু সেভ করোনি। যেকোনো প্রশ্নের পাশে \"সেভ\" চাপলে এখানে আসবে।"}</p>`;
   $$("#rvChips .chip").forEach(b => b.onclick = () => { const c = +b.dataset.c; rvCh.has(c) ? rvCh.delete(c) : rvCh.add(c); b.setAttribute("aria-pressed", rvCh.has(c)); $("#rvPoolN").textContent = bn(rvPool().length); });
   $("#rvPoolN").textContent = bn(rvPool().length);
 }
+$$("#rvKindSeg button").forEach(b => b.onclick = () => { rvKind = b.dataset.k; rvCh.clear(); renderRevision(); });
+$$("#rvModeSeg button").forEach(b => b.onclick = () => { rvMode = b.dataset.m; renderRevision(); });
 $("#rvSrc").onchange = () => $("#rvPoolN").textContent = bn(rvPool().length);
+$("#rvSubject").onchange = async () => {
+  subjId = $("#rvSubject").value; bank = await loadBank(subjId);
+  $("#fSubject").value = subjId; pickedCh.clear(); renderChips(); rvCh.clear(); renderRevision();
+};
 function startRevision(){
-  const p = shuffle(rvPool()).slice(0, Math.max(1, +$("#rvCount").value || 20));
-  if (!rvPool().length) return toast("এই ফিল্টারে কোনো ভুল প্রশ্ন নেই");
-  runExam({ kind: "rev", changeable: true, subj: subjId, qids: p, neg: false, title: "ভুলের রিভিশন", startAt: Date.now(), endAt: 0 });
+  const list = rvPool();
+  if (!list.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
+  if (rvMode === "solo") return startSolo(shuffle([...list]), rvKind === "wrong" ? "rev-wrong" : "rev-saved", "revision");
+  const p = spread(shuffle([...list]), Math.max(1, +$("#rvCount").value || 20), i => bank.q[i][0]);
+  runExam({ kind: "rev", revKind: rvKind, changeable: true, subj: subjId, qids: p, neg: false,
+            title: rvKind === "wrong" ? "ভুলের রিভিশন" : "সেভড প্রশ্নের রিভিশন", startAt: Date.now(), endAt: 0 });
 }
 
 /* ============ EXAM ============ */
@@ -761,14 +924,21 @@ function runExam(ex){
   exam.startedAt = ex.startAt || Date.now();
   $("#exTitle").textContent = exam.title;
   $("#herRow").classList.toggle("hidden", !exam.live);
-  $("#examRule").textContent = exam.changeable ? "এখানে উত্তর বদলানো যাবে।" : RULE;
+  $("#examRule").textContent = exam.ta ? RULE_TA : exam.changeable ? "এখানে উত্তর বদলানো যাবে।" : RULE;
   if (exam.live){ $("#herName").textContent = exam.oppName; $("#herProg").textContent = "০/" + bn(exam.qids.length); $("#herTrack").style.width = "0"; }
   const b = banks[exam.subj];
+  if (exam.ta){
+    if (ex.prev) Object.entries(ex.prev).forEach(([k,j]) => exam.ans[+k] = j);
+    exam.cur = 0; exam.taLock = false;
+    go("exam"); updateProg();
+    clearInterval(timerInt); timerInt = setInterval(tick, 250); tick();
+    taAdvance(); return;
+  }
   $("#qList").innerHTML = exam.qids.map((qi, k) => {
     if (qi < 0) return `<article class="blk q" id="q${k}"><p class="hint">${bn(k+1)}. এই প্রশ্নটা আর পাওয়া যাচ্ছে না।</p></article>`;
     const q = b.q[qi];
     return `<article class="blk q" id="q${k}">
-      <div class="meta"><span>${bn(k+1)}/${bn(exam.qids.length)}</span><span>${esc(q[4]||"")}</span></div>
+      <div class="meta"><span>${bn(k+1)}/${bn(exam.qids.length)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(exam.subj, qi)}</span></div>
       <h3>${esc(q[1])}</h3>
       <div class="opts">${q[2].map((o,j) => `<button class="opt" data-k="${k}" data-j="${j}"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
     </article>`;
@@ -801,6 +971,12 @@ function tick(){
   if (!exam || exam.done){ clearInterval(timerInt); return; }
   const el = $("#timer");
   const t = exam.duelId ? now() : Date.now();
+  if (exam.ta){
+    el.textContent = fmt(Math.max(0, Math.floor((t - exam.startedAt)/1000)) + TA_PEN * taWrongNow());
+    el.classList.toggle("low", !!exam.endAt && exam.endAt - t <= 60000);
+    if (exam.endAt && t >= exam.endAt) submit(true);
+    return;
+  }
   if (!exam.endAt){ el.textContent = fmt(Math.floor((t - exam.startedAt)/1000)); el.classList.remove("low"); return; }
   const left = Math.max(0, Math.ceil((exam.endAt - t)/1000));
   el.textContent = fmt(left); el.classList.toggle("low", left <= 60);
@@ -808,7 +984,7 @@ function tick(){
 }
 function confirmSubmit(){
   const left = exam.qids.length - Object.keys(exam.ans).length;
-  modal(`<h3 style="margin-top:0">জমা দেবে?</h3><p>${left ? bn(left)+"টি প্রশ্ন বাকি আছে।" : "সব উত্তর দেওয়া শেষ।"}</p>
+  modal(`<h3 style="margin-top:0">${exam.ta ? "এখনই শেষ করবে?" : "জমা দেবে?"}</h3><p>${left ? bn(left)+"টি প্রশ্ন বাকি আছে।" + (exam.ta ? " বাকিগুলো বাদ ধরা হবে, প্রতিটায় +১০ সেকেন্ড।" : "") : "সব উত্তর দেওয়া শেষ।"}</p>
     <div class="row"><button class="btn" onclick="closeModal()">না, আরো দেখি</button><button class="btn gold" onclick="closeModal();submit(false)">হ্যাঁ, জমা</button></div>`);
 }
 function confirmExit(){
@@ -816,7 +992,7 @@ function confirmExit(){
     modal(`<h3 style="margin-top:0">বের হবে?</h3><p>ডুয়েলের ঘড়ি চলতেই থাকবে। ডুয়েল পেজ থেকে আবার ফিরে আসতে পারবে, দেওয়া উত্তরগুলো থাকবে।</p>
       <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();leaveExam('duels')">বের হও</button></div>`);
   } else {
-    modal(`<h3 style="margin-top:0">বের হবে?</h3><p>${exam.kind === "rev" ? "এই রিভিশনের উত্তরগুলো সেভ হবে না।" : "এই পরীক্ষা বাতিল হবে, কিছু সেভ হবে না।"}</p>
+    modal(`<h3 style="margin-top:0">বের হবে?</h3><p>${exam.kind === "rev" ? "এই রিভিশনের উত্তরগুলো সেভ হবে না।" : exam.ta ? "এই টাইম অ্যাটাক বাতিল হবে।" : "এই পরীক্ষা বাতিল হবে, কিছু সেভ হবে না।"}</p>
       <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();leaveExam('${exam.kind === "rev" ? "revision" : "practice"}')">বের হও</button></div>`);
   }
 }
@@ -852,9 +1028,14 @@ async function submit(timeUp){
   exam.done = true; clearInterval(timerInt);
   const t = exam.duelId ? now() : Date.now();
   exam.usedMs = exam.endAt ? Math.min(t - exam.startedAt, exam.endAt - exam.startedAt) : t - exam.startedAt;
+  if (exam.ta){   // time attack: no stats, no mistake list
+    markSeen(exam.subj, exam.qids);
+    if (!exam.duelId) return showTAResult(timeUp);
+  }
   if (!exam.duelId){
     const rev = exam.kind === "rev";
-    if (rev){
+    if (rev && exam.revKind === "saved") markSeen(exam.subj, exam.qids);
+    else if (rev){
       const before = new Set(udArr("wrong", exam.subj));
       recordLocal(exam, false, "fix");
       exam.fixed = before.size - udArr("wrong", exam.subj).length;
@@ -864,14 +1045,14 @@ async function submit(timeUp){
     showPracticeResult(Object.assign({}, p, { qids: exam.qids, fixed: exam.fixed }), timeUp, rev ? "revision" : "practice");
     return;
   }
-  recordLocal(exam, true, "full");
+  if (!exam.ta) recordLocal(exam, true, "full");
   const id = exam.duelId, live = exam.live;
   await db.ref(`duels/${id}/p/${me.uid}`).update({ done: true, used: Math.max(0, exam.usedMs) });
   const d = duels[id];
   if (d && st(d).over){ showDuelResult(d); return; }
   if (live){
     waitingFor = id;
-    modal(`<h3 style="margin-top:0">জমা হয়ে গেছে ✅</h3><p>${esc(exam.oppName)} শেষ করার অপেক্ষা...</p><p class="hint">সময় শেষ হলে আপনা আপনি রেজাল্ট আসবে।</p>`);
+    modal(`<h3 style="margin-top:0">জমা হয়ে গেছে</h3><p>${esc(exam.oppName)} শেষ করার অপেক্ষা...</p><p class="hint">সময় শেষ হলে আপনা আপনি রেজাল্ট আসবে।</p>`);
   } else showDuelResult(d || { id });
 }
 
@@ -890,7 +1071,7 @@ function showPracticeResult(p, timeUp, back){
     ${timeUp ? '<p class="hint">সময় শেষ!</p>' : ""}<p style="margin:0 0 8px;font-weight:700">${esc(p.title)}</p>
     <div class="crown">${bn(r.s)} / ${bn(solo_ ? r.c + r.w : p.qids.length)}</div>
     <div class="stats"><div><b>${bn(r.c)}</b>সঠিক</div><div><b>${bn(r.w)}</b>ভুল</div><div><b>${bn(solo_ ? 0 : r.skip)}</b>বাদ</div></div>
-    ${p.fixed ? `<p style="font-weight:700;color:var(--ok)">${bn(p.fixed)}টা ভুল শুধরে নিয়েছ! রিভিশন লিস্ট থেকে সরানো হলো ✅</p>` : ""}
+    ${p.fixed ? `<p style="font-weight:700;color:var(--ok)">${bn(p.fixed)}টা ভুল শুধরে নিয়েছ! রিভিশন লিস্ট থেকে সরানো হলো</p>` : ""}
     ${p.used ? `<p class="hint">সময় লেগেছে ${fmt(Math.round(p.used/1000))}</p>` : ""}</div>`;
   $("#rvDiff").classList.add("hidden");
   lastReview = { subj: p.subj, qids: p.qids, mine: p.ans, hers: null };
@@ -904,7 +1085,7 @@ function renderReview(){
     if (rvFilter === "wrong" && m === a) return "";
     if (rvFilter === "diff" && m === h) return "";
     return `<article class="blk q">
-      <div class="meta"><span>${bn(k+1)}. ${esc(b.chapters[q[0]].n)}</span><span>${esc(q[4]||"")}</span></div>
+      <div class="meta"><span>${bn(k+1)}. ${esc(b.chapters[q[0]].n)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(subj, qi)}</span></div>
       <h3>${esc(q[1])}</h3>
       <div class="opts">${q[2].map((o,j) => {
         const cls = j === a ? "right" : (j === m ? "wrong" : "");
@@ -953,10 +1134,13 @@ function duelScores(d){
   const b = banks[d.subj] || bank, idx = dIdx(d);
   const A = toAns(d.p && d.p[d.from] && d.p[d.from].a), B = toAns(d.p && d.p[d.to] && d.p[d.to].a);
   const pa = (d.p && d.p[d.from]) || {}, pb = (d.p && d.p[d.to]) || {}, full = d.mins*60000;
-  return { A, B, sa: scoreWith(b, A, idx, d.neg), sb: scoreWith(b, B, idx, d.neg), ua: pa.used || full, ub: pb.used || full };
+  const ua = pa.used || full, ub = pb.used || full;
+  return { A, B, sa: scoreWith(b, A, idx, d.neg), sb: scoreWith(b, B, idx, d.neg), ua, ub,
+           ta: d.ta ? { a: taScore(b, A, idx, ua), b: taScore(b, B, idx, ub) } : null };
 }
 function winnerOf(d){
   const r = duelScores(d);
+  if (d.ta){ const x = r.ta.a.total, y = r.ta.b.total; return x === y ? "draw" : x < y ? d.from : d.to; }
   if (r.sa.s !== r.sb.s) return r.sa.s > r.sb.s ? d.from : d.to;
   if (Math.abs(r.ua - r.ub) > 1000) return r.ua < r.ub ? d.from : d.to;
   return "draw";
@@ -1060,6 +1244,14 @@ function renderPlayers(){
   $$("#plist .pl").forEach(b => b.onclick = () => { oppSel = b.dataset.u; renderPlayers(); });
   $("#sendBtn").disabled = !oppSel;
 }
+let createType = "normal";
+function applyCreateFields(){
+  const ta = createType === "ta";
+  setFields(1, 1, !ta, ta ? "সর্বোচ্চ সময় (মিনিট)" : "সময় (মিনিট)");
+  $$("#typeSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.t === createType));
+  $("#typeHint").textContent = ta ? "একটা করে প্রশ্ন, যার মোট সময় কম সে জিতবে। প্রতিটা ভুল বা বাদ +১০ সেকেন্ড।" : "বেশি নম্বর যার, সে জিতবে।";
+}
+$$("#typeSeg button").forEach(b => b.onclick = () => { createType = b.dataset.t; applyCreateFields(); });
 $$("#modeSeg button").forEach(b => b.onclick = () => {
   createMode = b.dataset.mode;
   $$("#modeSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
@@ -1074,7 +1266,7 @@ async function sendDuel(){
   if (!idx.length) return toast("এই ফিল্টারে কোনো প্রশ্ন নেই");
   const ref = db.ref("duels").push();
   const d = { from: me.uid, fromName: me.name, to: oppSel, toName: players[oppSel].name, subj: subjId, qids: toIds(subjId, idx),
-              mins: s.mins, neg: s.neg, title: titleFor(bank, idx), chs: chLabels(), paper, srcLabel: srcLabel(),
+              mins: s.mins, neg: createType === "ta" ? false : s.neg, ta: createType === "ta", title: titleFor(bank, idx), chs: chLabels(), paper, srcLabel: srcLabel(),
               mode: createMode, status: "pending", created: now() };
   if (createMode === "async") d.deadline = now() + (+$("#fDeadline").value)*3600000;
   await ref.set(d);
@@ -1084,7 +1276,7 @@ async function sendDuel(){
       <div class="info">${infoHtml(d)}</div>
       <div class="row" style="margin-top:12px"><button class="btn" onclick="closeModal();go('duels')">ঠিক আছে</button><button class="btn" onclick="cancelDuel('${ref.key}')">বাতিল</button></div>`);
   } else {
-    modal(`<h3 style="margin-top:0">চ্যালেঞ্জ পাঠানো হয়েছে ✅</h3><p>তুমি কি এখনই দিবে? ${esc(d.toName)} এক্সেপ্ট করে নিজের সময়ে দেবে।</p>
+    modal(`<h3 style="margin-top:0">চ্যালেঞ্জ পাঠানো হয়েছে</h3><p>তুমি কি এখনই দিবে? ${esc(d.toName)} এক্সেপ্ট করে নিজের সময়ে দেবে।</p>
       <div class="row"><button class="btn" onclick="closeModal();go('duels')">পরে দেবো</button><button class="btn pink" onclick="closeModal();askStart('${ref.key}')">এখনই দেবো</button></div>`);
   }
 }
@@ -1092,15 +1284,16 @@ function cancelDuel(id){ db.ref("duels/"+id).update({ status: "cancelled" }); if
 function infoHtml(d){
   const mode = isAsync(d) ? `🕒 যখন খুশি (বাকি ${fmtLeft(d.deadline - now())})` : "⚡ লাইভ (একসাথে)";
   return `মোড: <b>${mode}</b><br>
+    ধরন: <b>${d.ta ? "টাইম অ্যাটাক" : "সাধারণ পরীক্ষা"}</b><br>
     অধ্যায়: <b>${esc(chText(d.chs, d.paper))}</b><br>
     উৎস: <b>${esc(d.srcLabel || "সব প্রশ্ন")}</b><br>
-    <b>${bn(d.qids.length)}</b> প্রশ্ন · <b>${bn(d.mins)}</b> মিনিট · নেগেটিভ মার্কিং ${d.neg ? "<b>আছে</b>" : "নেই"}`;
+    <b>${bn(d.qids.length)}</b> প্রশ্ন · ${d.ta ? `সর্বোচ্চ <b>${bn(d.mins)}</b> মিনিট · ভুলে +১০ সেকেন্ড` : `<b>${bn(d.mins)}</b> মিনিট · নেগেটিভ মার্কিং ${d.neg ? "<b>আছে</b>" : "নেই"}`}`;
 }
 function challengePopup(id){
   const d = duels[id]; if (!d) return;
   modal(`<h3 style="margin-top:0">⚔️ ${esc(d.fromName)} তোমাকে চ্যালেঞ্জ করেছে!</h3>
     <div class="info">${infoHtml(d)}</div>
-    <p class="hint">${RULE}</p>
+    <p class="hint">${ruleOf(d)}</p>
     <div class="row" style="margin-top:14px"><button class="btn" onclick="rejectDuel('${id}')">রিজেক্ট</button><button class="btn pink" onclick="acceptDuel('${id}')">এক্সেপ্ট</button></div>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeModal()">পরে দেখবো</button>`);
 }
@@ -1110,7 +1303,7 @@ async function acceptDuel(id){
   if (!d || st(d).isVoid || d.status !== "pending") return toast("এই চ্যালেঞ্জ আর নেই");
   if (isAsync(d)){
     await db.ref("duels/"+id).update({ status: "accepted", acceptedAt: now() });
-    modal(`<h3 style="margin-top:0">এক্সেপ্ট করা হয়েছে ✅</h3><p>এখনই দিবে, নাকি পরে? শেষ সময়: ${fmtLeft(d.deadline - now())} বাকি।</p>
+    modal(`<h3 style="margin-top:0">এক্সেপ্ট করা হয়েছে</h3><p>এখনই দিবে, নাকি পরে? শেষ সময়: ${fmtLeft(d.deadline - now())} বাকি।</p>
       <div class="row"><button class="btn" onclick="closeModal()">পরে</button><button class="btn pink" onclick="closeModal();askStart('${id}')">এখনই</button></div>`);
   } else {
     const startAt = now() + 6000;
@@ -1122,7 +1315,7 @@ function askStart(id){
   const d = duels[id]; if (!d) return;
   if (st(d).myP.start) return startDuel(id);
   modal(`<h3 style="margin-top:0">শুরু করবে?</h3><p>শুরু করলেই <b>${bn(d.mins)} মিনিটের</b> ঘড়ি চালু হবে। মাঝপথে বের হলেও ঘড়ি চলতেই থাকবে।</p>
-    <p style="font-weight:600">${RULE}</p>
+    <p style="font-weight:600">${ruleOf(d)}</p>
     <div class="row"><button class="btn" onclick="closeModal()">না</button><button class="btn pink" onclick="closeModal();startDuel('${id}')">শুরু!</button></div>`);
 }
 async function startDuel(id){
@@ -1130,22 +1323,22 @@ async function startDuel(id){
   const s = st(d);
   if (!s.canPlay) return toast("এই ডুয়েল এখন দেওয়া যাবে না");
   await loadBank(d.subj);
-  const base = { duelId: id, kind: "duel", subj: d.subj, qids: dIdx(d), neg: d.neg, title: d.title, oppName: oppNameOf(d), prev: toAns(s.myP.a) };
+  const base = { duelId: id, kind: "duel", ta: !!d.ta, subj: d.subj, qids: dIdx(d), neg: d.neg, title: d.title, oppName: oppNameOf(d), prev: toAns(s.myP.a) };
   if (s.live){
     const go_ = () => runExam(Object.assign(base, { live: true, startAt: d.startAt, endAt: d.endAt }));
-    if (now() < d.startAt) countdown(d.startAt, go_); else go_();
+    if (now() < d.startAt) countdown(d.startAt, go_, "একসাথে শুরু হচ্ছে...", ruleOf(d)); else go_();
   } else {
     let start = s.myP.start;
     if (!start){ start = now(); await db.ref(`duels/${id}/p/${me.uid}/start`).set(start); }
     runExam(Object.assign(base, { live: false, startAt: start, endAt: start + d.mins*60000 }));
   }
 }
-function countdown(startAt, cb){
+function countdown(startAt, cb, label = "একসাথে শুরু হচ্ছে...", rule = RULE){
   modalLocked = true;
   const step = () => {
     const left = Math.ceil((startAt - now())/1000);
     if (left <= 0){ modalLocked = false; closeModal(); cb(); return; }
-    modal(`<div class="countdown">${bn(left)}</div><p style="text-align:center">একসাথে শুরু হচ্ছে...</p><p class="hint" style="text-align:center">${RULE}</p>`);
+    modal(`<div class="countdown">${bn(left)}</div><p style="text-align:center">${label}</p><p class="hint" style="text-align:center">${rule}</p>`);
     setTimeout(step, 200);
   };
   step();
@@ -1163,6 +1356,31 @@ function showDuelResult(d){
   const mine = iAmA ? r.A : r.B, hers = iAmA ? r.B : r.A;
   const ms = iAmA ? r.sa : r.sb, hs = iAmA ? r.sb : r.sa;
   const mu = iAmA ? r.ua : r.ub, hu = iAmA ? r.ub : r.ua;
+  if (d.ta){
+    const ta = r.ta, mt = iAmA ? ta.a : ta.b, ht = iAmA ? ta.b : ta.a;
+    if (!s.over){
+      $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
+        <p style="margin:0 0 8px;font-weight:700">${esc(d.title)} · টাইম অ্যাটাক</p>
+        <div class="crown">তোমার সময়: ${fmt(mt.total)}</div>
+        <div class="stats"><div><b>${bn(mt.c)}</b>সঠিক</div><div><b>${bn(mt.w + mt.missing)}</b>ভুল/বাদ</div><div><b>+${bn(mt.pen)}</b>সেকেন্ড</div></div>
+        <p class="hint">${esc(opp)} শেষ করলে পুরো রেজাল্ট দেখবে, নোটিফিকেশন পাবে।</p></div>`;
+      $("#rvDiff").classList.add("hidden");
+      lastReview = { subj: d.subj, qids: dIdx(d), mine, hers: null };
+    } else {
+      const w = winnerOf(d);
+      const head = w === "draw" ? "ড্র!" : (w === me.uid ? "তুমি জিতেছ!" : `${esc(opp)} জিতেছে`);
+      const side = (cls, who, t) => `<div class="side ${cls}"><div>${who}</div><div class="big">${fmt(t.total)}</div><div>${bn(t.c)} ঠিক · ${bn(t.w + t.missing)} ভুল/বাদ</div><div class="hint" style="color:inherit">+${bn(t.pen)} সেকেন্ড</div></div>`;
+      $("#resTop").innerHTML = `<div class="blk" style="text-align:center;padding-top:16px">
+        <div class="crown">${head}</div>
+        <div class="vs">${side("me", "তুমি", mt)}<div class="vstxt px">VS</div>${side("her", esc(opp), ht)}</div>
+        <p class="hint" style="padding:0 12px 12px">${esc(d.title)} · টাইম অ্যাটাক · যার মোট সময় কম সে জিতবে</p></div>`;
+      $("#rvDiff").classList.remove("hidden");
+      lastReview = { subj: d.subj, qids: dIdx(d), mine, hers, herName: opp };
+      const ev = new Set(LS.get("rd_ev", [])); ev.add(d.id + ":res"); LS.set("rd_ev", [...ev].slice(-400));
+    }
+    exam = null;
+    return openResult("duels");
+  }
   if (!s.over){
     $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
       <p style="margin:0 0 8px;font-weight:700">${esc(d.title)}</p>
@@ -1193,7 +1411,7 @@ function showDuelResult(d){
 /* ============ DUEL LISTS ============ */
 function duelCard(d){
   const s = st(d), opp = oppNameOf(d);
-  const tag = isAsync(d) ? '<span class="mtag async">যখন খুশি</span>' : '<span class="mtag live">লাইভ</span>';
+  const tag = (d.ta ? '<span class="mtag ta">টাইম অ্যাটাক</span> ' : "") + (isAsync(d) ? '<span class="mtag async">যখন খুশি</span>' : '<span class="mtag live">লাইভ</span>');
   let status = "", acts = "";
   if (s.incoming){
     status = `${esc(d.fromName)} তোমাকে চ্যালেঞ্জ করেছে`;
@@ -1223,7 +1441,7 @@ function renderDuels(){
   $("#doneList").innerHTML = done.length ? done.map(d => {
     const r = duelScores(d), iA = d.from === me.uid, w = winnerOf(d);
     const res = w === me.uid ? '<span class="res-w">জয়</span>' : w === "draw" ? '<span class="res-d">ড্র</span>' : '<span class="res-l">হার</span>';
-    return `<div class="blk card clickrow" onclick="showDuelResult(duels['${d.id}'])"><div class="top"><span class="nm">vs ${esc(oppNameOf(d))}</span><span>${res} <b>${bn(iA ? r.sa.s : r.sb.s)} - ${bn(iA ? r.sb.s : r.sa.s)}</b></span></div>
+    return `<div class="blk card clickrow" onclick="showDuelResult(duels['${d.id}'])"><div class="top"><span class="nm">vs ${esc(oppNameOf(d))}</span><span>${res} <b>${d.ta ? `${fmt((iA ? r.ta.a : r.ta.b).total)} - ${fmt((iA ? r.ta.b : r.ta.a).total)}` : `${bn(iA ? r.sa.s : r.sb.s)} - ${bn(iA ? r.sb.s : r.sa.s)}`}</b></span></div>
       <div class="info">${esc(d.title)} · ${dateBn(d.created)}</div></div>`;
   }).join("") : '<p class="hint">এখনো কোনো ডুয়েল শেষ হয়নি।</p>';
   const perm = "Notification" in window && Notification.permission === "default";
@@ -1238,8 +1456,8 @@ function renderHome(){
   const n = actionCount();
   $("#duelCnt").textContent = bn(n); $("#duelCnt").classList.toggle("hidden", !n);
   $("#tsDuel").textContent = n ? `${bn(n)}টা তোমার অপেক্ষায়` : "বন্ধুর সাথে লড়াই";
-  const wr = wrongIdx().length;
-  $("#tsRev").textContent = wr ? `${bn(wr)}টা ভুল প্রশ্ন জমা` : "যেগুলো ভুল করেছ";
+  const wr = wrongIdx().length, sv = listIdx("saved").length;
+  $("#tsRev").textContent = wr || sv ? `${bn(wr)}টা ভুল · ${bn(sv)}টা সেভড` : "ভুল আর সেভ করা প্রশ্ন";
   const ps = UD.psess.filter(p => p.type === "exam").length;
   $("#tsPractice").textContent = ps ? `${bn(ps)}টা পরীক্ষা দেওয়া` : "পরীক্ষা বা একটা একটা করে";
 }
@@ -1293,7 +1511,7 @@ function openInbox(){
 async function askPerm(){
   if (!("Notification" in window)) return toast("এই ব্রাউজারে নোটিফিকেশন সাপোর্ট নেই");
   const r = await Notification.requestPermission();
-  toast(r === "granted" ? "নোটিফিকেশন চালু হয়েছে ✅" : "নোটিফিকেশন বন্ধ রাখা হলো");
+  toast(r === "granted" ? "নোটিফিকেশন চালু হয়েছে" : "নোটিফিকেশন বন্ধ রাখা হলো");
   closeModal(); refreshScreen();
 }
 
@@ -1362,6 +1580,8 @@ async function boot(){
     return;
   }
   $("#srcNote").textContent = "প্রশ্নের উৎস: " + bank.source + " · " + bn(bank.q.length) + "টি প্রশ্ন";
+  if (bank.old) $("#homeAlert").innerHTML = `<div class="blk panel" style="margin-top:16px;border-color:var(--bad)"><b>প্রশ্নের ফাইলটা পুরনো</b><p class="hint" style="margin-bottom:0">GitHub এ data ফোল্ডারে নতুন bio.json আপলোড করো। না হলে সেভ, রিভিশন আর ডুয়েল ঠিকমতো কাজ করবে না।</p></div>`;
+  $("#rvSubject").innerHTML = $("#fSubject").innerHTML;
   udLoadLocal();
   renderChips();
   try { initFb(); } catch(e){ console.error(e); }
