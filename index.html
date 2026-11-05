@@ -164,6 +164,13 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
 .savebtn[aria-pressed="true"]{background:var(--gold);color:#2A2005}
 .savebtn[aria-pressed="true"] svg path{fill:currentColor}
 .mtag.ta{background:var(--gold);color:#2A2005}
+.pic{margin:4px 0 12px}
+.pic img{display:block;max-width:100%;height:auto;background:#fff;border:2px solid var(--line)}
+.exp.pic img{border:0}
+.opts.grid{grid-template-columns:repeat(auto-fit,minmax(60px,1fr))}
+.opts.grid .opt{justify-content:center}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pic img{filter:invert(.92) hue-rotate(180deg)}}
+:root[data-theme="dark"] .pic img{filter:invert(.92) hue-rotate(180deg)}
 .verdict{font-weight:700;font-size:18px;margin:12px 0 0}
 .verdict.ok{color:var(--ok)}.verdict.no{color:var(--bad)}
 .solo-nav{display:flex;gap:8px;margin-top:14px}
@@ -697,6 +704,29 @@ function titleFor(b, idxs){
   return b.subject + " (" + bn(set.size) + "টি অধ্যায়)";
 }
 
+/* ============ PICTURE QUESTIONS (matrices, graphs, structures) ============ */
+const isImgQ = q => !!(q[8] & 1);
+const optText = (q, o) => isImgQ(q) ? "" : esc(o);
+function qBody(subj, qi, q){
+  if (!isImgQ(q)) return `<h3>${esc(q[1])}</h3>`;
+  return `<div class="pic" data-img="${subj}|${q[7]}|q"><span class="hint">ছবি লোড হচ্ছে...</span></div>`;
+}
+function expImg(subj, qi, q){ return (q[8] & 2) ? `<div class="exp pic" data-img="${subj}|${q[7]}|e"><span class="hint">ব্যাখ্যার ছবি লোড হচ্ছে...</span></div>` : ""; }
+const imgPacks = {};
+function imgPack(subj){
+  if (!imgPacks[subj]) imgPacks[subj] = fetch(`data/${subj}_img.json`, { cache: "no-cache" }).then(r => r.json()).catch(() => { delete imgPacks[subj]; return {}; });
+  return imgPacks[subj];
+}
+async function fillPics(){
+  for (const el of $$(".pic[data-img]:not([data-done])")){
+    el.dataset.done = "1";
+    const [subj, id, kind] = el.dataset.img.split("|");
+    const pack = await imgPack(subj), b = pack[id] && pack[id][kind];
+    el.innerHTML = b ? `<img alt="${kind === "q" ? "প্রশ্ন" : "ব্যাখ্যা"}" src="data:image/webp;base64,${b}">` : '<span class="hint">ছবিটা পাওয়া যায়নি</span>';
+  }
+}
+new MutationObserver(() => { if (document.querySelector(".pic[data-img]:not([data-done])")) fillPics(); }).observe(document.body, { childList: true, subtree: true });
+
 /* ============ PRACTICE ============ */
 let practiceMode = LS.get("rd_pmode", "exam"), solo = null;
 function setFields(count, time, neg, timeLbl){
@@ -758,18 +788,18 @@ function renderSolo(){
   const b = banks[solo.subj], qi = solo.list[solo.i], q = b.q[qi], pk = solo.st[solo.i], done = pk !== undefined;
   const opts = q[2].map((o,j) => {
     const cls = !done ? "" : j === q[3] ? "right" : (j === pk ? "wrong" : "");
-    return `<button class="opt ${cls}" data-j="${j}" ${done ? "disabled" : ""} onclick="soloAnswer(${j})"><b>${L[j]}</b><span>${esc(o)}</span></button>`;
+    return `<button class="opt ${cls}" data-j="${j}" ${done ? "disabled" : ""} onclick="soloAnswer(${j})"><b>${L[j]}</b><span>${optText(q, o)}</span></button>`;
   }).join("");
   let after = "";
   if (done){
     const ok = pk === q[3];
     after = (pk === -1 ? `<p class="verdict">সঠিক উত্তর: ${L[q[3]]}</p>` : `<p class="verdict ${ok ? "ok" : "no"}">${ok ? "সঠিক!" : `ভুল। সঠিক উত্তর: ${L[q[3]]}`}</p>`)
-      + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "");
+      + (q[6] ? `<div class="exp">${esc(q[6])}</div>` : "") + expImg(solo.subj, qi, q);
   }
   const last = solo.i >= solo.list.length - 1;
   $("#soloCard").innerHTML = `<article class="blk q">
     <div class="meta"><span>${bn(solo.i+1)}/${bn(solo.list.length)} · ${esc(b.chapters[q[0]].n)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(solo.subj, qi)}</span></div>
-    <h3>${esc(q[1])}</h3><div class="opts">${opts}</div>${after}
+    ${qBody(solo.subj, qi, q)}<div class="opts${isImgQ(q) ? " grid" : ""}">${opts}</div>${after}
   </article>
   <div class="solo-nav">
     <button class="btn" onclick="soloPrev()" ${solo.i ? "" : "disabled"}>← আগের</button>
@@ -869,8 +899,8 @@ function renderTA(){
   const b = banks[exam.subj], k = exam.cur, qi = exam.qids[k], q = b.q[qi];
   $("#qList").innerHTML = `<article class="blk q">
     <div class="meta"><span>${bn(k+1)}/${bn(exam.qids.length)} · ${esc(b.chapters[q[0]].n)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(exam.subj, qi)}</span></div>
-    <h3>${esc(q[1])}</h3>
-    <div class="opts">${q[2].map((o,j) => `<button class="opt" data-j="${j}" onclick="taAnswer(${j})"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
+    ${qBody(exam.subj, qi, q)}
+    <div class="opts${isImgQ(q) ? " grid" : ""}">${q[2].map((o,j) => `<button class="opt" data-j="${j}" onclick="taAnswer(${j})"><b>${L[j]}</b><span>${optText(q, o)}</span></button>`).join("")}</div>
   </article>`;
 }
 function taAdvance(){
@@ -975,8 +1005,8 @@ function runExam(ex){
     const q = b.q[qi];
     return `<article class="blk q" id="q${k}">
       <div class="meta"><span>${bn(k+1)}/${bn(exam.qids.length)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(exam.subj, qi)}</span></div>
-      <h3>${esc(q[1])}</h3>
-      <div class="opts">${q[2].map((o,j) => `<button class="opt" data-k="${k}" data-j="${j}"><b>${L[j]}</b><span>${esc(o)}</span></button>`).join("")}</div>
+      ${qBody(exam.subj, qi, q)}
+      <div class="opts${isImgQ(q) ? " grid" : ""}">${q[2].map((o,j) => `<button class="opt" data-k="${k}" data-j="${j}"><b>${L[j]}</b><span>${optText(q, o)}</span></button>`).join("")}</div>
     </article>`;
   }).join("");
   $$("#qList .opt").forEach(btn => btn.onclick = () => answer(+btn.dataset.k, +btn.dataset.j));
@@ -1122,14 +1152,14 @@ function renderReview(){
     if (rvFilter === "diff" && m === h) return "";
     return `<article class="blk q">
       <div class="meta"><span>${bn(k+1)}. ${esc(b.chapters[q[0]].n)}</span><span class="mright">${esc(q[4]||"")}${saveBtn(subj, qi)}</span></div>
-      <h3>${esc(q[1])}</h3>
-      <div class="opts">${q[2].map((o,j) => {
+      ${qBody(subj, qi, q)}
+      <div class="opts${isImgQ(q) ? " grid" : ""}">${q[2].map((o,j) => {
         const cls = j === a ? "right" : (j === m ? "wrong" : "");
         const tags = (j === m ? `<span class="tag">তুমি</span>` : "") + (hers && j === h ? `<span class="tag">${esc(herName)}</span>` : "");
-        return `<button class="opt ${cls}" disabled><b>${L[j]}</b><span>${esc(o)}${tags}</span></button>`;
+        return `<button class="opt ${cls}" disabled><b>${L[j]}</b><span>${optText(q, o)}${tags}</span></button>`;
       }).join("")}</div>
       ${m === undefined ? '<p class="hint">তুমি উত্তর দাওনি</p>' : ""}
-      ${q[6] ? `<div class="exp">${esc(q[6])}</div>` : ""}
+      ${q[6] ? `<div class="exp">${esc(q[6])}</div>` : ""}${expImg(subj, qi, q)}
     </article>`;
   }).join("") || '<p class="hint" style="text-align:center">এখানে কিছু নেই 🎉</p>';
 }
