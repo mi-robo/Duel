@@ -67,8 +67,6 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:10p
 .ibtn{width:40px;height:40px;display:grid;place-items:center;border:3px solid var(--line);background:var(--panel);box-shadow:3px 3px 0 var(--line);cursor:pointer;font-size:18px;padding:0}
 .ibtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
 #bellBtn[aria-pressed="false"]{opacity:.55}
-#soundBtn{color:var(--ink)}
-#soundBtn[aria-pressed="false"]{opacity:.55}
 /* ===== Tabs ===== */
 .tabs{display:flex;gap:8px;margin-bottom:16px}
 .tabs button{flex:1;padding:10px 6px;border:3px solid var(--line);background:var(--panel2);cursor:pointer;font-weight:700}
@@ -219,7 +217,6 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:20px 0}
     <div class="hbtns">
       <button id="installBtn" class="ibtn hidden" onclick="doInstall()" aria-label="অ্যাপ ইনস্টল করো">⬇️</button>
       <button id="bellBtn" class="ibtn hidden" onclick="openInbox()" aria-label="নোটিফিকেশন">🔔<span id="bellCnt" class="cnt hidden"></span></button>
-      <button id="soundBtn" class="ibtn" onclick="toggleSound()" aria-label="সাউন্ড"></button>
       <button id="themeBtn" class="ibtn" onclick="toggleTheme()" aria-label="থিম বদলাও">🌙</button>
       <button id="meBadge" class="badge hidden" onclick="openProfile()" aria-label="প্রোফাইল ও সিঙ্ক কোড" style="cursor:pointer;font:inherit;font-weight:700"></button>
     </div>
@@ -818,7 +815,6 @@ function soloAnswer(j){
   const qi = solo.list[solo.i], q = banks[solo.subj].q[qi], ok = j === q[3];
   solo.st[solo.i] = j;
   if (ok){ solo.c++; solo.streak++; solo.best = Math.max(solo.best, solo.streak); } else { solo.w++; solo.streak = 0; }
-  if (!ok) sfx("wrong"); else if (solo.streak >= 3 && (solo.streak === 3 || solo.streak % 5 === 0)) sfx("combo", solo.streak); else sfx("correct");
   markSeen(solo.subj, [qi]);
   if (ok && solo.kind === "rev-wrong") fixWrong(solo.subj, qi);
   if (!ok && navigator.vibrate) navigator.vibrate(80);
@@ -871,7 +867,7 @@ document.addEventListener("click", e => {
 function toggleSave(subj, qi){
   const id = qId(subj, qi), arr = udArr("saved", subj), k = arr.indexOf(id);
   if (k >= 0) arr.splice(k, 1); else arr.push(id);
-  udSave(); sfx(k >= 0 ? "tick" : "save");
+  udSave();
   const on = k < 0;
   $$(`.savebtn[data-s="${subj}"][data-q="${qi}"]`).forEach(b => {
     b.setAttribute("aria-pressed", on); b.querySelector("span").textContent = on ? "সেভড" : "সেভ";
@@ -919,7 +915,6 @@ function taAnswer(j){
   exam.ans[k] = j; exam.taLock = true;
   if (exam.duelId && db) db.ref(`duels/${exam.duelId}/p/${me.uid}/a/${k}`).set(j);
   $$("#qList .opt").forEach(b => { const x = +b.dataset.j; b.disabled = true; if (x === q[3]) b.classList.add("right"); else if (x === j) b.classList.add("wrong"); });
-  sfx(ok ? "correct" : "wrong");
   if (!ok){ toast("+১০ সেকেন্ড"); if (navigator.vibrate) navigator.vibrate(80); }
   updateProg(); tick();
   const ex = exam;
@@ -932,11 +927,10 @@ function taWrongNow(){
 }
 function showTAResult(timeUp){
   const b = banks[exam.subj], r = taScore(b, exam.ans, exam.qids, exam.usedMs);
-  setTimeout(() => exam && exam.newRec ? sfx("record") : scoreSfx(r.c / Math.max(1, exam.qids.length)), 150);
   const prev = UD.tabest[exam.taKey];
   let msg = prev ? `<p class="hint">তোমার রেকর্ড: <b>${fmt(prev.s)}</b></p>` : "";
   if (!r.missing && (!prev || r.total < prev.s)){
-    UD.tabest[exam.taKey] = { s: r.total, t: Date.now() }; udSave(); exam.newRec = true;
+    UD.tabest[exam.taKey] = { s: r.total, t: Date.now() }; udSave();
     msg = `<p style="font-weight:700;color:var(--ok)">${prev ? `নতুন রেকর্ড! আগেরটা ছিল ${fmt(prev.s)}` : "প্রথম রেকর্ড সেট হলো! এবার এটা ভাঙো।"}</p>`;
   } else if (r.missing) msg += `<p class="hint">সব প্রশ্নের উত্তর না দিলে রেকর্ড গোনা হয় না।</p>`;
   $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
@@ -1031,7 +1025,7 @@ function answer(k, j){
   if (exam.done) return;
   const first = exam.ans[k] === undefined;
   if (!first && !exam.changeable) return;   // OMR style: one shot
-  lockAnswer(k, j); updateProg(); sfx("tick");
+  lockAnswer(k, j); updateProg();
   if (exam.duelId && db) db.ref(`duels/${exam.duelId}/p/${me.uid}/a/${k}`).set(j);
   const nx = $(`#q${k+1}`);
   if (first && nx) setTimeout(() => nx.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }), 120);
@@ -1140,7 +1134,6 @@ function openResult(back){
 }
 function showPracticeResult(p, timeUp, back, fresh){
   const b = banks[p.subj] || bank, r = scoreWith(b, p.ans, p.qids, p.neg);
-  if (fresh) setTimeout(() => scoreSfx(r.c / Math.max(1, p.qids.length)), 150);
   const solo_ = p.type === "solo";
   $("#resTop").innerHTML = `<div class="blk panel" style="text-align:center">
     ${timeUp ? '<p class="hint">সময় শেষ!</p>' : ""}<p style="margin:0 0 8px;font-weight:700">${esc(p.title)}</p>
@@ -1410,11 +1403,10 @@ async function startDuel(id){
   }
 }
 function countdown(startAt, cb, label = "একসাথে শুরু হচ্ছে...", rule = RULE){
-  modalLocked = true; let shown = null;
+  modalLocked = true;
   const step = () => {
     const left = Math.ceil((startAt - now())/1000);
-    if (left <= 0){ modalLocked = false; closeModal(); sfx("go"); cb(); return; }
-    if (left !== shown && left <= 3){ shown = left; sfx("count"); }
+    if (left <= 0){ modalLocked = false; closeModal(); cb(); return; }
     modal(`<div class="countdown">${bn(left)}</div><p style="text-align:center">${label}</p><p class="hint" style="text-align:center">${rule}</p>`);
     setTimeout(step, 200);
   };
@@ -1446,7 +1438,6 @@ function showDuelResult(d, fresh){
       lastReview = { subj: d.subj, qids: dIdx(d), mine, hers: null };
     } else {
       const w = winnerOf(d);
-      if (fresh) setTimeout(() => sfx(w === "draw" ? "draw" : w === me.uid ? "win" : "lose"), 150);
       const head = w === "draw" ? "ড্র!" : (w === me.uid ? "তুমি জিতেছ!" : `${esc(opp)} জিতেছে`);
       const side = (cls, who, t) => `<div class="side ${cls}"><div>${who}</div><div class="big">${fmt(t.total)}</div><div>${bn(t.c)} ঠিক · ${bn(t.w + t.missing)} ভুল/বাদ</div><div class="hint" style="color:inherit">+${bn(t.pen)} সেকেন্ড</div></div>`;
       $("#resTop").innerHTML = `<div class="blk" style="text-align:center;padding-top:16px">
@@ -1470,7 +1461,6 @@ function showDuelResult(d, fresh){
     lastReview = { subj: d.subj, qids: dIdx(d), mine, hers: null };
   } else {
     const w = winnerOf(d);
-    if (fresh) setTimeout(() => sfx(w === "draw" ? "draw" : w === me.uid ? "win" : "lose"), 150);
     const head = w === "draw" ? "ড্র!" : (w === me.uid ? "তুমি জিতেছ!" : `${esc(opp)} জিতেছে`);
     $("#resTop").innerHTML = `<div class="blk" style="text-align:center;padding-top:16px">
       <div class="crown">${head}</div>
@@ -1598,46 +1588,8 @@ async function askPerm(){
 /* ============ ALERTS: sound, vibration, notification ============ */
 let actx = null;
 document.addEventListener("pointerdown", () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch(e){} }, { passive: true });
-/* ============ SOUND FX (chiptune, generated in code) ============ */
-let soundOn = LS.get("rd_sound", true);
-function tone(f, t0, dur, type = "square", vol = 0.05, f2 = null){
-  if (!actx || !soundOn) return;
-  const t = actx.currentTime + t0, o = actx.createOscillator(), g = actx.createGain();
-  o.type = type; o.frequency.setValueAtTime(f, t);
-  if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
-}
-const N = { C4: 262, E4: 330, G4: 392, A4: 440, C5: 523, D5: 587, E5: 659, G5: 784, A5: 880, C6: 1047, E6: 1319, G6: 1568 };
-const SFX = {
-  tick:    () => tone(1400, 0, 0.03, "triangle", 0.03),
-  save:    () => { tone(1200, 0, 0.04, "square", 0.025); tone(1800, 0.045, 0.05, "square", 0.025); },
-  correct: () => { tone(N.E5, 0, 0.07); tone(N.A5, 0.07, 0.11); },
-  wrong:   () => tone(240, 0, 0.22, "triangle", 0.07, 150),
-  combo:   n => { const k = 1 + Math.min(n, 15) * 0.04; [N.C5, N.E5, N.G5, N.C6].forEach((f, i) => tone(f * k, i * 0.055, 0.08, "square", 0.04)); },
-  count:   () => tone(N.A4, 0, 0.09, "square", 0.045),
-  go:      () => { tone(N.A5, 0, 0.18, "square", 0.05); tone(N.E6, 0, 0.18, "triangle", 0.03); },
-  win:     () => { [N.C5, N.E5, N.G5, N.C6].forEach((f, i) => tone(f, i * 0.09, 0.1)); tone(N.E6, 0.38, 0.32, "square", 0.045); tone(N.C6, 0.38, 0.32, "triangle", 0.04); },
-  good:    () => { tone(N.G5, 0, 0.09); tone(N.C6, 0.1, 0.18); },
-  lose:    () => { [N.G4, N.E4, N.C4].forEach((f, i) => tone(f, i * 0.14, 0.16, "triangle", 0.06)); },
-  draw:    () => { tone(N.E5, 0, 0.12, "triangle", 0.05); tone(N.E5, 0.16, 0.16, "triangle", 0.05); },
-  record:  () => { [N.C5, N.E5, N.G5, N.C6, N.E6, N.G6].forEach((f, i) => tone(f, i * 0.06, 0.07, "square", 0.04)); tone(N.C6, 0.4, 0.4, "triangle", 0.05); },
-};
-function sfx(name, arg){ try { SFX[name] && SFX[name](arg); } catch(e){} }
-function scoreSfx(ratio){ sfx(ratio >= 0.8 ? "win" : ratio >= 0.5 ? "good" : "lose"); }
-function toggleSound(){
-  soundOn = !soundOn; LS.set("rd_sound", soundOn); updateSoundBtn();
-  if (soundOn){ try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch(e){} sfx("correct"); }
-  toast(soundOn ? "সাউন্ড চালু" : "সাউন্ড বন্ধ");
-}
-function updateSoundBtn(){
-  const b = $("#soundBtn"); if (!b) return;
-  b.innerHTML = `<svg width="20" height="18" viewBox="0 0 10 9" shape-rendering="crispEdges" aria-hidden="true" fill="currentColor"><path d="M0 3h2V2h1V1h1V0h1v9H4V8H3V7H2V6H0z"/>${soundOn ? '<path d="M6 3h1v3H6zM8 1h1v1h1v5H9v1H8V7h1V2H8z"/>' : '<path d="M6 2h1v1h1v1h1V3h1v1H9v1h1v1H9V5H8v1H7V5h1V4H7V3H6z"/>'}</svg>`;
-  b.setAttribute("aria-pressed", soundOn); b.setAttribute("aria-label", soundOn ? "সাউন্ড বন্ধ করো" : "সাউন্ড চালু করো");
-}
 function beep(){
-  if (!actx || !soundOn) return;
+  if (!actx) return;
   [0, 0.18, 0.36].forEach((t,i) => {
     const o = actx.createOscillator(), g = actx.createGain();
     o.type = "square"; o.frequency.value = [660, 880, 1100][i];
@@ -1682,7 +1634,6 @@ function closeModal(){ if (modalLocked) return; $("#modal").classList.add("hidde
 
 /* ============ BOOT ============ */
 applyTheme(LS.get("rd_theme", null));
-updateSoundBtn();
 initFbApp();
 let booted = false;
 async function boot(){
